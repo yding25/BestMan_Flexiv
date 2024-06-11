@@ -22,7 +22,7 @@ import flexivrdk
 # fmt: on
 
 
-class Bestman:
+class Bestman_Real_Flexiv:
     def __init__(self, robot_ip, local_ip, frequency):
         self.robot = flexivrdk.Robot(robot_ip, local_ip)
         self.frequency = frequency
