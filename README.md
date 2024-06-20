@@ -1,14 +1,53 @@
-# Python API for Flexiv
+<img src="docs/BestMan_logo.png" alt="BestMan Logo" width="500"/>
 
-## Installation Guide
-1. Install Flexiv RDK with python
-  https://rdk.flexiv.com/manual/getting_started.html#setup-and-run-python-rdk
+<!-- # BestMan_Flexiv - A Pybullet-based Mobile Manipulator Simulator -->
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/facebookresearch/home-robot/blob/main/LICENSE)
+[![Ubuntu 20.04](https://img.shields.io/badge/Ubuntu-20.04-orange.svg)](https://releases.ubuntu.com/20.04/)
+[![Ubuntu 22.04](https://img.shields.io/badge/Ubuntu-22.04-orange.svg)](https://releases.ubuntu.com/22.04/)
+[![Python 3.8](https://img.shields.io/badge/python-3.8-blue.svg)](https://www.python.org/downloads/release/python-370/)
+<!-- [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat)](https://timothycrosley.github.io/isort/) -->
 
-2. Install Python Dependencies
-  ```
-  pip install numpy argparse ikpy pyserial minimalmodbus pyRobotiqGripper scipy
-  ```
+Welcome to the BestMan_Flexiv repository, a codebase dedicated to the Flexiv robotic arm.
 
-## Reference
-IKPy’s documentation: https://ikpy.readthedocs.io/en/latest/index.html
-Flexiv RDK APIs: https://rdk.flexiv.cn/api/index.html
+## 💻 Installation
+
+- Pull the repository
+
+```
+git clone https://github.com/yding25/BestMan_Flexiv.git
+```
+
+- Put the repository in flexiv_rdk (the version is 0.10, you can also download it from https://github.com/flexivrobotics/flexiv_rdk.git or https://rdk.flexiv.com/manual/getting_started.html#setup-and-run-python-rdk)
+```
+cd BestMan_Flexiv/Install
+unzip flexiv_rdk.zip -d /home/[X]
+mv BestMan_Flexiv /home/[X]/flexiv_rdk/
+```
+Note, [X] is your account name
+
+- Create conda environment
+
+```
+cd ./flexiv_rdk/BestMan_Flexiv/Install
+conda env create -f basic_environment.yaml
+```
+
+## 🔎 Project Structure
+
+```
+tree -L 2 BestMan_Flexiv/ > BestMan_Flexiv/Asset/project_structure.txt
+cat Asset/project_structure.txt
+```
+
+## 👨‍💻 Basic Demos
+:shamrock: **Load Kitchens**
+
+```
+python Examples/load_kitchen.py
+```
+
+##  :handshake: Reference
+- [IKPy’s documentation](https://ikpy.readthedocs.io/en/latest/index.html)
+- [Flexiv RDK APIs](https://rdk.flexiv.cn/api/index.html)

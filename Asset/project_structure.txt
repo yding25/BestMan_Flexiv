@@ -1,0 +1,23 @@
+BestMan_Flexiv/
+├── Asset
+│   ├── flexiv_rizon10_kinematics.urdf
+│   ├── flexiv_rizon4_kinematics.urdf
+│   ├── flexiv_rizon4s_kinematics.urdf
+│   ├── meshes
+│   ├── project_structure.txt
+│   └── test.md
+├── docs
+│   ├── BestMan_logo.png
+│   └── test.txt
+├── Examples
+│   └── api_test.py
+├── Install
+│   ├── basic_environment.yaml
+│   └── flexiv_rdk.zip
+├── LICENSE.txt
+├── README.md
+└── RoboticsToolBox
+    ├── Api_flexiv.py
+    └── utility.py
+
+6 directories, 14 files
