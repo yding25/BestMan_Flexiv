@@ -49,6 +49,8 @@ cat Asset/project_structure.txt
 python Examples/load_kitchen.py
 ```
 
+## 📧 Contact Information
+
 If you have any questions or need further assistance, please feel free to reach out via email:
 - dingyan at pjlab.org.cn
 - Zhuoma Zhaxi at pjlab.org.cn
