@@ -53,7 +53,7 @@ python Examples/load_kitchen.py
 
 If you have any questions or need further assistance, please feel free to reach out via email:
 - dingyan at pjlab.org.cn
-- Zhuoma Zhaxi at pjlab.org.cn
+- zhaxizhuoma at pjlab.org.cn
 
 
 ##  :handshake: Reference
