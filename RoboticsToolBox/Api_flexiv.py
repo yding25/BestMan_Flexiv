@@ -17,8 +17,9 @@ from utility import list2str
 # Import Flexiv RDK Python library
 # fmt: off
 import sys
-sys.path.insert(0, "../lib_py")
+sys.path.insert(0, "../Install/flexiv_rdk/lib_py")
 import flexivrdk
+import threading
 # fmt: on
 
 
@@ -37,26 +38,6 @@ class Bestman_Real_Flexiv:
         ]
         self.log_file = 'command_log.tum'
 
-
-    def Prepare(self):
-        # Parse Arguments
-        argparser = argparse.ArgumentParser()
-        # Required arguments
-        argparser.add_argument("robot_ip", help="IP address of the robot server")
-        argparser.add_argument("local_ip", help="IP address of this PC")
-        argparser.add_argument(
-            "frequency", help="command frequency, 1 to 200 [Hz]", type=int)
-        # Optional arguments
-        argparser.add_argument(
-            "--hold", action="store_true",
-            help="robot holds current joint positions, otherwise do a sine-sweep")
-        args = argparser.parse_args()
-
-        # Check if arguments are valid
-        frequency = args.frequency
-        assert (frequency >= 1 and frequency <= 200), "Invalid <frequency> input"
-
-        self.log = flexivrdk.Log()
 
     def Fault_clear(self):
         # Clear fault on robot server if any
@@ -224,6 +205,22 @@ class Bestman_Real_Flexiv:
         self.update_robot_states()
         joint_values = self.robot_states.q
         return joint_values
+    
+    def get_current_end_effector_pose(self):
+        """
+        Retrieves the current pose of the robot arm's end effector.
+
+        This function obtains the position and orientation of the end effector.
+
+        Returns:
+            pose: the [x, y, z, roll, pitch, yaw] value of tcp
+        """
+
+        self.update_robot_states()
+        pose = self.robot_states.tcpPose
+        pose = self.pose_to_euler(pose)
+
+        return pose
 
 
 #==========================================================================================joint_move
@@ -253,7 +250,6 @@ class Bestman_Real_Flexiv:
             MAX_ACC = [0.5] * DOF
         
         self.robot.sendJointPosition(target_pos, target_vel, target_acc, MAX_VEL, MAX_ACC)
-        time.sleep(1)
 
 
     def move_joint_traject(self, targets, target_vel=None, target_acc=None, MAX_VEL=None, MAX_ACC=None):
@@ -293,23 +289,6 @@ class Bestman_Real_Flexiv:
             time.sleep(period)
 
 #==============================================================================================effector_move
-
-    def get_current_end_effector_pose(self):
-        """
-        Retrieves the current pose of the robot arm's end effector.
-
-        This function obtains the position and orientation of the end effector.
-
-        Returns:
-            position: the [x, y, z] value of tcp
-            orientation: [qw, qx, qy, qz] quaternion of tcp
-        """
-
-        self.update_robot_states()
-        pose = self.robot_states.tcpPose
-        position = pose[:3]
-        orientation = pose[3:]
-        return position, orientation
 
 
     def move_end_effector_to_goal_pose(self, end_effector_goal_pose, max_linear_vel=0.5, max_angular_vel=1.0):
@@ -398,11 +377,9 @@ class Bestman_Real_Flexiv:
 
         axis_index = axis_index_map[axis]
         
-        position, orientation = self.get_current_end_effector_pose()
-        current_pose = position + orientation
-        euler_angles = self.pose_to_euler(current_pose)
-        euler_angles[axis_index] += angle
-        new_pose = self.euler_to_pose(euler_angles)
+        current_pose = self.get_current_end_effector_pose()
+        current_pose[axis_index] += angle
+        new_pose = self.euler_to_pose(current_pose)
         
         self.robot.setMode(self.mode.NRT_CARTESIAN_MOTION_FORCE_BASE)
         self.robot.sendCartesianMotionForce(new_pose)

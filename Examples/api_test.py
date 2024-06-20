@@ -1,4 +1,12 @@
+import sys
+import os
+
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append(os.path.join(parent_dir, 'RoboticsToolBox'))
+
 from Api_flexiv import *
+
+
 
 def main():
     # Parse Arguments
@@ -27,7 +35,7 @@ def main():
         # =============================================================================
         # Instantiate robot interface
         #robot = flexivrdk.Robot(args.robot_ip, args.local_ip)
-        bestman = Bestman(args.robot_ip, args.local_ip, args.frequency)
+        bestman = Bestman_Real_Flexiv(args.robot_ip, args.local_ip, args.frequency)
         # Clear fault on robot server if any
         if bestman.robot.isFault():
             log.warn("Fault occurred on robot server, trying to clear ...")
