@@ -29,7 +29,7 @@ class Bestman_Real_Flexiv:
         self.log = flexivrdk.Log()
         self.mode = flexivrdk.Mode
         self.robot_states = flexivrdk.RobotStates()
-        urdf_file = "/home/yan/flexiv_rdk-0.10/flexiv_rdk-0.10/resources/flexiv_rizon4_kinematics.urdf" #urdf_file path
+        urdf_file = "../Asset/flexiv_rizon4_kinematics.urdf" #urdf_file path
         self.robot_chain = Chain.from_urdf_file(urdf_file)
         self.active_joints = [
             joint for joint in self.robot_chain.links 
