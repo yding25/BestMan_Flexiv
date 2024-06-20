@@ -13,19 +13,20 @@ Welcome to the BestMan_Flexiv repository, a codebase dedicated to the Flexiv rob
 
 ## 💻 Installation
 
-- Pull the repository
+- Clone the Repository
 
 ```
 git clone https://github.com/yding25/BestMan_Flexiv.git
 ```
 
-- Put the repository in flexiv_rdk (the version is 0.10, you can also download it from https://github.com/flexivrobotics/flexiv_rdk.git or https://rdk.flexiv.com/manual/getting_started.html#setup-and-run-python-rdk)
+- Integrate with flexiv_rdk 
+Ensure you have flexiv_rdk version 0.10. You can download it from [Flexiv Robotics GitHub](https://github.com/flexivrobotics/flexiv_rdk.git) or the [Flexiv RDK](https://rdk.flexiv.com/manual/getting_started.html#setup-and-run-python-rdk) Manual.
 ```
 cd BestMan_Flexiv/Install
 unzip flexiv_rdk.zip -d /home/[X]
 mv BestMan_Flexiv /home/[X]/flexiv_rdk/
 ```
-Note, [X] is your account name
+Note, Replace **[X]** with your account name.
 
 - Create conda environment
 
@@ -35,7 +36,7 @@ conda env create -f basic_environment.yaml
 ```
 
 ## 🔎 Project Structure
-
+Generate and view the project structure:
 ```
 tree -L 2 BestMan_Flexiv/ > BestMan_Flexiv/Asset/project_structure.txt
 cat Asset/project_structure.txt
@@ -47,6 +48,8 @@ cat Asset/project_structure.txt
 ```
 python Examples/load_kitchen.py
 ```
+
+If you have any questions or need further assistance, please feel free to reach out at dingyan at pjlab.org.cn. Happy coding!
 
 ##  :handshake: Reference
 - [IKPy’s documentation](https://ikpy.readthedocs.io/en/latest/index.html)
