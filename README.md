@@ -1,4 +1,4 @@
-<img src="docs/BestMan_logo.png" alt="BestMan Logo" width="500"/>
+<img src="docs/BestMan_logo.png" alt="BestMan Logo" width="700"/>
 
 <!-- # BestMan_Flexiv - A Pybullet-based Mobile Manipulator Simulator -->
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/facebookresearch/home-robot/blob/main/LICENSE)
