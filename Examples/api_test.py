@@ -4,9 +4,7 @@ import os
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(os.path.join(parent_dir, 'RoboticsToolBox'))
 
-from Api_flexiv import *
-
-
+from Bestman_sim_flexiv import *
 
 def main():
     # Parse Arguments
@@ -64,10 +62,6 @@ def main():
                     "into Auto mode")
 
         log.info("Robot is now operational")
-
-        bestman.go_home()
-        while (parse_pt_states(bestman.robot.getPrimitiveStates(), "reachedTarget") != "1"):
-            time.sleep(1)
 
         #joint_values = bestman.get_current_joint_values()
         #log.info(f"Current joint values: {joint_values}")
@@ -138,9 +132,9 @@ def main():
         #while (parse_pt_states(bestman.robot.getPrimitiveStates(), "reachedTarget") != "1"):
         #    time.sleep(1)
 
-        goal_pose = [0.7,  0.3, 0.3, 3.14159, 0.0, 3.14159]
-        wer = [1, 0, 0, 0, 0, 0] 
-        bestman.move_end_effector_to_goal_pose_wrench(goal_pose, wer)
+        #goal_pose = [0.7,  0.3, 0.3, 3.14159, 0.0, 3.14159]
+        #wer = [1, 0, 0, 0, 0, 0] 
+        #bestman.move_end_effector_to_goal_pose_wrench(goal_pose, wer)
 
         #goal_pose = [0.7, -0.5, 0.13, 3.14159, 0.0, 3.14159]
         #bestman.move_end_effector_to_goal_pose(goal_pose, max_linear_vel=0.1, max_angular_vel=0.5)
@@ -165,14 +159,14 @@ def main():
         #bestman.move_arm_to_joint_values(goal)
 
 
-        goal_position = [0.7, 0.3, 0.5]
-        goal_orientation = [3.14159, 0.0, 3.14159]  # Roll, Pitch, Yaw
-        a = [0.7, 0.3, 0.5, 3.14159, 0.0, 3.14159]
-        joint_values = bestman.cartesian_to_joints(goal_position, goal_orientation)
+        #goal_position = [0.7, 0.3, 0.5]
+        #goal_orientation = [3.14159, 0.0, 3.14159]  # Roll, Pitch, Yaw
+        #a = [0.7, 0.3, 0.5, 3.14159, 0.0, 3.14159]
+        #joint_values = bestman.cartesian_to_joints(goal_position, goal_orientation)
         
 
         #bestman.move_end_effector_to_goal_pose(a)
-        time.sleep(2)
+        #time.sleep(2)
         #bestman.go_home()
         #while (parse_pt_states(bestman.robot.getPrimitiveStates(), "reachedTarget") != "1"):
          #   time.sleep(1)
@@ -199,7 +193,13 @@ def main():
         #joint_bounds = bestman.get_joint_bounds()
         #print("Joint bounds:", joint_bounds)
 
-        #bestman.active_gripper(255,255,255)
+        bestman.active_gripper(255,255,255)
+        bestman.active_gripper(255,255,255)
+        bestman.active_gripper(255,255,255)
+        bestman.active_gripper(255,255,255)
+        bestman.active_gripper(255,255,255)
+
+
 
 
 

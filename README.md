@@ -43,21 +43,12 @@ cat Asset/project_structure.txt
 ```
 
 ## 👨‍💻 Basic Demos
-:shamrock: **Display the robot states**
+:shamrock: **Load Kitchens**
 
 ```
-python Examples/demo1_display_robot_states.py [robot_ip] [local_ip]
+python Examples/load_kitchen.py
 ```
-:shamrock: **Control to hold or sine-sweep all robot joints.**
 
-```
-python Examples/demo2_non_realtime_joint_position_control.py [robot_ip] [local_ip] [frequency]
-```
-:shamrock: **Control to hold or sine-sweep the robot TCP**
-
-```
-python Examples/demo3_non_realtime_cartesian_pure_motion_control.py [robot_ip] [local_ip] [frequency]
-```
 ## 📧 Contact Information
 
 If you have any questions or need further assistance, please feel free to reach out via email:
