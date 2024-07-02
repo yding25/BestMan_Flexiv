@@ -16,17 +16,12 @@ Welcome to the BestMan_Flexiv repository, a codebase dedicated to the Flexiv rob
 - Clone the Repository
 
 ```
+cd /home/$(whoami)
 git clone https://github.com/yding25/BestMan_Flexiv.git
 ```
 
-- Integrate with flexiv_rdk 
-Ensure you have flexiv_rdk version 0.10. You can download it from [Flexiv Robotics GitHub](https://github.com/flexivrobotics/flexiv_rdk.git) or the [Flexiv RDK](https://rdk.flexiv.com/manual/getting_started.html#setup-and-run-python-rdk) Manual.
-```
-cd BestMan_Flexiv/Install
-unzip flexiv_rdk.zip -d /home/[X]
-mv BestMan_Flexiv /home/[X]/flexiv_rdk/
-```
-Note, Replace **[X]** with your account name.
+<!-- - Integrate with flexiv_rdk 
+Ensure you have flexiv_rdk version 0.10. You can download it from [Flexiv Robotics GitHub](https://github.com/flexivrobotics/flexiv_rdk.git) or the [Flexiv RDK](https://rdk.flexiv.com/manual/getting_started.html#setup-and-run-python-rdk) Manual. -->
 
 - Create conda environment
 
@@ -38,15 +33,15 @@ conda env create -f basic_environment.yaml
 ## 🔎 Project Structure
 Generate and view the project structure:
 ```
-tree -L 2 BestMan_Flexiv/ > BestMan_Flexiv/Asset/project_structure.txt
-cat Asset/project_structure.txt
+doxygen Doxyfile
+firefox /home/$(whoami)/BestMan_Flexiv/docs/html/index.html
 ```
 
 ## 👨‍💻 Basic Demos
 :shamrock: **Load Kitchens**
 
 ```
-python Examples/load_kitchen.py
+python /home/$(whoami)/BestMan_Flexiv/Examples/open_gripper.py 192.168.2.100 192.168.2.108 20
 ```
 
 ## 📧 Contact Information
