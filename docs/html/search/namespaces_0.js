@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['close_5fgripper_46',['close_gripper',['../namespaceclose__gripper.html',1,'']]]
+  ['close_5fgripper_45',['close_gripper',['../namespaceclose__gripper.html',1,'']]]
 ];

@@ -61,8 +61,8 @@ def main():
         log.info("Robot is now operational")
 
         # Get and log current joint values and bounds
-        joint_values = bestman.get_current_joint_values()
-        log.info(f"Current joint values: {joint_values}")
+        joint_angles = bestman.get_current_joint_angles()
+        log.info(f"Current joint values: {joint_angles}")
 
         joint_bounds = bestman.get_joint_bounds()
         log.info(f"Current joint bounds: {joint_bounds}")

@@ -1,7 +1,7 @@
 '''
 Run this script using:
 
-python move_arm_follow_joint_values.py 192.168.2.100 192.168.2.108 20
+python move_arm_to_follow_trajectory.py 192.168.2.100 192.168.2.108 20
 '''
 
 import sys
@@ -61,8 +61,8 @@ def main():
         log.info("Robot is now operational")
 
         # Get and log current joint values and bounds
-        joint_values = bestman.get_current_joint_values()
-        log.info(f"Current joint values: {joint_values}")
+        joint_angles = bestman.get_current_joint_angles()
+        log.info(f"Current joint angles: {joint_angles}")
 
         joint_bounds = bestman.get_joint_bounds()
         log.info(f"Current joint bounds: {joint_bounds}")
