@@ -222,12 +222,12 @@ class Bestman_Real_Flexiv:
 
         return pose
 
-    def move_arm_to_joint_values(self, target_pos, target_vel=None, target_acc=None, MAX_VEL=None, MAX_ACC=None):
+    def move_arm_to_joint_values(self, target_joint, target_vel=None, target_acc=None, MAX_VEL=None, MAX_ACC=None):
         '''
         Move arm to a specific set of joint angles, considering physics.
 
         Args:
-            target_pos: A list of desired joint angles (in radians) for each joint of the arm.
+            target_joint: A list of desired joint angles (in radians) for each joint of the arm.
             target_vel: Optional. A list of target velocities for each joint.
             target_acc: Optional. A list of target accelerations for each joint.
             MAX_VEL: Optional. A list of maximum velocities for each joint.
@@ -246,15 +246,15 @@ class Bestman_Real_Flexiv:
         if MAX_ACC is None:
             MAX_ACC = [0.5] * DOF
         
-        self.robot.sendJointPosition(target_pos, target_vel, target_acc, MAX_VEL, MAX_ACC)
+        self.robot.sendJointPosition(target_joint, target_vel, target_acc, MAX_VEL, MAX_ACC)
 
 
-    def move_joint_traject(self, targets, target_vel=None, target_acc=None, MAX_VEL=None, MAX_ACC=None):
+    def move_arm_to_follow_joint_values(self, target_trajectory, target_vel=None, target_acc=None, MAX_VEL=None, MAX_ACC=None):
         '''
-        Move arm to a specific set of joint angles, considering physics.
+        Move arm to a few set of joint angles, considering physics.
 
         Args:
-            target_pos: A list of desired joint angles (in radians) for each joint of the arm.
+            target_trajectory: A list of desired joint angles (in radians) for each joint of the arm.
             target_vel: Optional. A list of target velocities for each joint.
             target_acc: Optional. A list of target accelerations for each joint.
             MAX_VEL: Optional. A list of maximum velocities for each joint.
@@ -273,7 +273,7 @@ class Bestman_Real_Flexiv:
         if MAX_ACC is None:
             MAX_ACC = [1.0] * DOF
 
-        for target_pos in targets:
+        for target_pos in target_trajectory:
             # Monitor fault on robot server
             if self.robot.isFault():
                 raise Exception("Fault occurred on robot server, exiting ...")
@@ -325,7 +325,7 @@ class Bestman_Real_Flexiv:
         self.robot.sendCartesianMotionForce(end_effector_goal_pose_que, wrench, max_linear_vel, max_angular_vel)
 
 
-    def move_effector_traject(self, targets, max_linear_vel=0.5, max_angular_vel=1.0):
+    def move_end_effector_to_follow_trajectory(self, targets, max_linear_vel=0.5, max_angular_vel=1.0):
         '''
         Move arm's end effector to a target position.
 

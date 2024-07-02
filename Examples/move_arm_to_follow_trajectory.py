@@ -1,52 +1,48 @@
+'''
+Run this script using:
+
+python move_arm_to_follow_joint_values.py 192.168.2.100 192.168.2.108 20
+'''
+
 import sys
 import os
-
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(os.path.join(parent_dir, 'RoboticsToolBox'))
-
+import pyRobotiqGripper
 from Bestman_sim_flexiv import *
 
 def main():
     # Parse Arguments
-    # =============================================================================
-    argparser = argparse.ArgumentParser()
+    argparser = argparse.ArgumentParser(description="Move the robot arm to follow a trajectory.")
     # Required arguments
     argparser.add_argument("robot_ip", help="IP address of the robot server")
     argparser.add_argument("local_ip", help="IP address of this PC")
-    argparser.add_argument(
-        "frequency", help="command frequency, 1 to 200 [Hz]", type=int)
+    argparser.add_argument("frequency", type=int, help="Command frequency, 1 to 200 [Hz]")
     # Optional arguments
-    argparser.add_argument(
-        "--hold", action="store_true",
-        help="robot holds current joint positions, otherwise do a sine-sweep")
+    argparser.add_argument("--hold", action="store_true", help="Robot holds current joint positions, otherwise do a sine-sweep")
     args = argparser.parse_args()
 
-    # Check if arguments are valid
+    # Validate the frequency argument
     frequency = args.frequency
-    assert (frequency >= 1 and frequency <= 200), "Invalid <frequency> input"
+    assert 1 <= frequency <= 200, "Invalid <frequency> input"
 
     log = flexivrdk.Log()
 
-
     try:
-        # RDK Initialization
-        # =============================================================================
-        # Instantiate robot interface
-        #robot = flexivrdk.Robot(args.robot_ip, args.local_ip)
+        # Instantiate the robot interface
         bestman = Bestman_Real_Flexiv(args.robot_ip, args.local_ip, args.frequency)
-        # Clear fault on robot server if any
+
+        # Clear fault on the robot server if any
         if bestman.robot.isFault():
-            log.warn("Fault occurred on robot server, trying to clear ...")
-            # Try to clear the fault
+            log.warn("Fault occurred on the robot server, trying to clear ...")
             bestman.robot.clearFault()
             time.sleep(2)
-            # Check again
             if bestman.robot.isFault():
                 log.error("Fault cannot be cleared, exiting ...")
                 return
-            log.info("Fault on robot server is cleared")
+            log.info("Fault on the robot server is cleared")
 
-        # Enable the robot, make sure the E-stop is released before enabling
+        # Enable the robot, ensuring the E-stop is released before enabling
         log.info("Enabling robot ...")
         bestman.robot.enable()
 
@@ -57,21 +53,21 @@ def main():
             seconds_waited += 1
             if seconds_waited == 10:
                 log.warn(
-                    "Still waiting for robot to become operational, please "
+                    "Still waiting for robot to become operational. Please "
                     "check that the robot 1) has no fault, 2) is booted "
-                    "into Auto mode")
+                    "into Auto mode"
+                )
 
         log.info("Robot is now operational")
 
-        #joint_values = bestman.get_current_joint_values()
-        #log.info(f"Current joint values: {joint_values}")
+        # Get and log current joint values and bounds
+        joint_values = bestman.get_current_joint_values()
+        log.info(f"Current joint values: {joint_values}")
 
-        #joint_bounds = bestman.get_joint_bounds()
-        #log.info(f"Current joint bounds: {joint_bounds}")
+        joint_bounds = bestman.get_joint_bounds()
+        log.info(f"Current joint bounds: {joint_bounds}")
 
-        target = [0.8, -0.7, 0, 1.3, 0, 0.5, 0.2]
-
-        targets1 = [
+        target_trajectory = [
             [0.5729730725288391, -0.05068958178162575, 0.19427451491355896, 0.2969912886619568, -0.6381924748420715, 0.6559267044067383, -0.27251917123794556],
             [0.5860132575035095, -0.03786855563521385, 0.23408854007720947, 0.33398041129112244, -0.6333060264587402, 0.6339964866638184, -0.29228243231773376],
             [0.5932722687721252, -0.00427872221916914, 0.2615146338939667, -0.36070218682289124, 0.6458043456077576, -0.6061388254165649, 0.2922779619693756],
@@ -100,113 +96,11 @@ def main():
             [0.6121770143508911, 0.04117409512400627, 0.2725994288921356, 0.4189033806324005, -0.5498623847961426, 0.6234208345413208, -0.36540088057518005]
         ]
 
-        targets2 = [
-            [0.4, -0.5, 0, 1.3, 0, 0.5, 0.2],
-            [0.5, -0.55, 0.1, 1.3, 0, 0.5, 0.2],
-            [0.55, -0.6, 0.2, 1.3, 0, 0.5, 0.2],
-            [0.6, -0.7, 0, 1.3, 0, 0.5, 0.2],
-            [0.7, -0.7, 0, 1.3, 0, 0.5, 0.2],
-            [0.8, -0.7, 0, 1.3, 0, 0.5, 0.2]
-        ]
-
-        targets3 = [
-            [0.59, -0.11, 0.13, 3.14159, 0.0, 3.14159],
-            [0.59, -0.33, 0.13, 3.14159, 0.0, 3.14159],
-            [0.7, -0.11, 0.13, 2.5, 0.0, 3.14159],
-            [0.9, -0.11, 0.13, 2.5, 0.0, 3.14159]
-        ]
-
-        #bestman.move_arm_to_joint_values(target)
-        #bestman.move_joint_traject(targets2)
-        #time.sleep(1)
-
-        #bestman.move_effector_traject(targets1, max_linear_vel=0.1, max_angular_vel=0.5)
-
-        #joint_values = bestman.get_current_joint_values()
-        #log.info(f"Current joint values: {joint_values}")
-
-        #position, orientation = bestman.get_current_end_effector_pose()
-        #log.info(f"Current position and orientation: {position, orientation}")
-
-        #bestman.go_home()
-        #while (parse_pt_states(bestman.robot.getPrimitiveStates(), "reachedTarget") != "1"):
-        #    time.sleep(1)
-
-        #goal_pose = [0.7,  0.3, 0.3, 3.14159, 0.0, 3.14159]
-        #wer = [1, 0, 0, 0, 0, 0] 
-        #bestman.move_end_effector_to_goal_pose_wrench(goal_pose, wer)
-
-        #goal_pose = [0.7, -0.5, 0.13, 3.14159, 0.0, 3.14159]
-        #bestman.move_end_effector_to_goal_pose(goal_pose, max_linear_vel=0.1, max_angular_vel=0.5)
-        #time.sleep(1)
-
-        #bestman.rotate_end_effector_joint(0.8)
-
-        #goal = [0.69, -0.11, 0.13, -0.00, 0.00, 1.00, 0.00]
-        #pose = bestman.pose_to_euler(goal)
-        #print(pose) #[0.69, -0.11, 0.13, 3.141592653589793, 0.0, 3.141592653589793]
-
-        #goal_pose = [0.7, -0.0, 0.13, 3.14159, 0.0, 3.14159]
-        #bestman.move_end_effector_to_goal_pose(goal_pose)
-
-        #goal_pose = [0.7, 0.2, 0.2, 3.14159, 0.0, 3.14159]
-        #bestman.move_end_effector_to_goal_pose(goal_pose)#q:[0.40, -0.79, 0.04, 1.43, -0.04, 0.64, 0.45]
-
-        #goal = [0.5, -0.7, 0, 1.5, 0, 0.7, 0.0]
-        #position, euler_angles = bestman.joints_to_cartesian(goal)
-        
-        #print(position, euler_angles)
-        #bestman.move_arm_to_joint_values(goal)
-
-
-        #goal_position = [0.7, 0.3, 0.5]
-        #goal_orientation = [3.14159, 0.0, 3.14159]  # Roll, Pitch, Yaw
-        #a = [0.7, 0.3, 0.5, 3.14159, 0.0, 3.14159]
-        #joint_values = bestman.cartesian_to_joints(goal_position, goal_orientation)
-        
-
-        #bestman.move_end_effector_to_goal_pose(a)
-        #time.sleep(2)
-        #bestman.go_home()
-        #while (parse_pt_states(bestman.robot.getPrimitiveStates(), "reachedTarget") != "1"):
-         #   time.sleep(1)
-        #bestman.move_arm_to_joint_values(joint_values)
-        #print("Calculated joint values:", joint_values)
-
-
-        #calculate_IK_error
-        #bestman.move_arm_to_joint_values(joint_values)
-
-        #bestman.move_arm_to_joint_values(joint_values)
-
-        
-        #bestman.print_joint_link_info('arm')
-        #a = bestman.get_arm_id()
-        #b = bestman.get_DOF()
-        #c = bestman.get_joint_idx()
-        #d = bestman.get_tcp_link()
-        #print(a)
-        #print(b)
-        #print(c)
-        #print(d)
-
-        #joint_bounds = bestman.get_joint_bounds()
-        #print("Joint bounds:", joint_bounds)
-
-        bestman.active_gripper(255,255,255)
-        bestman.active_gripper(255,255,255)
-        bestman.active_gripper(255,255,255)
-        bestman.active_gripper(255,255,255)
-        bestman.active_gripper(255,255,255)
-
-
-
-
-
-
+        bestman.move_end_effector_to_follow_trajectory(target_trajectory, max_linear_vel=0.1, max_angular_vel=0.5)
+        time.sleep(1)
 
     except Exception as e:
-        # Print exception error message
+        # Log any exceptions that occur
         log.error(str(e))
 
 
