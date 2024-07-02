@@ -1,5 +1,6 @@
 '''
-python /home/$(whoami)/BestMan_Flexiv/Examples/display_states.py 192.168.2.100 192.168.2.108 20
+Run this script using:
+python /home/$(whoami)/BestMan_Flexiv/Examples/display_states.py 192.168.2.100 192.168.2.108
 '''
 
 import sys
@@ -8,14 +9,14 @@ parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(os.path.join(parent_dir, 'RoboticsToolBox'))
 from Bestman_sim_flexiv import *
 
-def print_robot_states(robot_controller):
+def print_robot_states(bestman):
     """
     Print robot states data @ 1Hz.
     """
     while True:
         # Get the latest robot states
-        robot_controller.update_robot_states()
-        robot_states = robot_controller.robot_states
+        bestman.update_robot_states()
+        robot_states = bestman.robot_states
 
         # Print all robot states, round all float values to 2 decimals
         print("{")
@@ -35,7 +36,7 @@ def print_robot_states(robot_controller):
         print("FT_sensor_raw_reading: ", ['%.2f' % i for i in robot_states.ftSensorRaw])
         print("F_ext_tcp_frame: ", ['%.2f' % i for i in robot_states.extWrenchInTcp])
         print("F_ext_base_frame: ", ['%.2f' % i for i in robot_states.extWrenchInBase])
-        print("}")
+        print("}" + '\n')
         time.sleep(1)
 
 def main():
@@ -46,7 +47,7 @@ def main():
     args = argparser.parse_args()
 
     # Instantiate Bestman_Real_Flexiv
-    robot_controller = Bestman_Real_Flexiv(args.robot_ip, args.local_ip, frequency=1)
+    bestman = Bestman_Real_Flexiv(args.robot_ip, args.local_ip, frequency=1)
 
     # Print description
     print(
@@ -56,16 +57,16 @@ def main():
 
     try:
         # Initialize and clear faults
-        robot_controller.Fault_clear()
+        bestman.Fault_clear()
 
         # Print States
-        print_thread = threading.Thread(target=print_robot_states, args=[robot_controller])
+        print_thread = threading.Thread(target=print_robot_states, args=[bestman])
         print_thread.start()
         print_thread.join()
 
     except Exception as e:
         # Print exception error message
-        robot_controller.log.error(str(e))
+        bestman.log.error(str(e))
 
 if __name__ == "__main__":
     main()

@@ -1,5 +1,6 @@
 '''
-python /home/$(whoami)/BestMan_Flexiv/Examples/open_gripper.py 192.168.2.100 192.168.2.108 20
+Run this script using:
+python /home/$(whoami)/BestMan_Flexiv/Examples/close_gripper.py 192.168.2.100 192.168.2.108 20
 '''
 
 import sys
@@ -11,7 +12,6 @@ from Bestman_sim_flexiv import *
 
 def main():
     # Parse Arguments
-    # =============================================================================
     argparser = argparse.ArgumentParser()
     # Required arguments
     argparser.add_argument("robot_ip", help="IP address of the robot server (default: 192.168.2.100)")
@@ -28,8 +28,8 @@ def main():
     frequency = args.frequency
     assert (frequency >= 1 and frequency <= 200), "Invalid <frequency> input"
 
+    # Initialize logging
     log = flexivrdk.Log()
-
 
     try:
         '''
@@ -41,19 +41,14 @@ def main():
         # Clear fault on robot server if any
         if bestman.robot.isFault():
             log.warn("Fault occurred on robot server, trying to clear ...")
-            
-            # Try to clear the fault
             bestman.robot.clearFault()
             time.sleep(1)
-            
-            # Check again
             if bestman.robot.isFault():
                 log.error("Fault cannot be cleared, exiting ...")
                 return
-            
             log.info("Fault on robot server is cleared")
         
-        # Enable the robot, make sure the E-stop is released before enabling
+        # Enable the robot
         log.info("Enabling robot ...")
         bestman.robot.enable()
         
@@ -73,13 +68,13 @@ def main():
         while (parse_pt_states(bestman.robot.getPrimitiveStates(), "reachedTarget") != "1"):
             time.sleep(1)
 
-        # open gripper
+        # Connect and open the gripper
         bestman.connect_gripper()
-        bestman.close_gripper()
         time.sleep(1)
+        bestman.close_gripper()
 
     except Exception as e:
-        # Print exception error message
+        # Log any exceptions that occur
         log.error(str(e))
 
 

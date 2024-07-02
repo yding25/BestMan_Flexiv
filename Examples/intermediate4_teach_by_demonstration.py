@@ -14,22 +14,17 @@ __author__ = "Flexiv"
 
 import time
 import argparse
-
-# Utility methods
+import sys
+import os
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append(os.path.join(parent_dir, 'RoboticsToolBox'))
 from utility import quat2eulerZYX
 from utility import list2str
 from utility import parse_pt_states
-
-# Import Flexiv RDK Python library
-# fmt: off
-import sys
-sys.path.insert(0, "../lib_py")
-import flexivrdk
-# fmt: on
+from Bestman_sim_flexiv import *
 
 # Maximum contact wrench [fx, fy, fz, mx, my, mz] [N][Nm]
 MAX_CONTACT_WRENCH = [50.0, 50.0, 50.0, 15.0, 15.0, 15.0]
-
 
 def print_description():
     """
