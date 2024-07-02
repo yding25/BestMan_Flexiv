@@ -1,7 +1,7 @@
 '''
 Run this script using:
 
-python move_arm_to_follow_joint_values.py 192.168.2.100 192.168.2.108 20
+python move_arm_follow_joint_values.py 192.168.2.100 192.168.2.108 20
 '''
 
 import sys
@@ -96,7 +96,7 @@ def main():
             [0.6121770143508911, 0.04117409512400627, 0.2725994288921356, 0.4189033806324005, -0.5498623847961426, 0.6234208345413208, -0.36540088057518005]
         ]
 
-        bestman.move_end_effector_to_follow_trajectory(target_trajectory, max_linear_vel=0.1, max_angular_vel=0.5)
+        bestman.move_end_effector_follow_trajectory(target_trajectory, max_linear_vel=0.1, max_angular_vel=0.5)
         time.sleep(1)
 
     except Exception as e:

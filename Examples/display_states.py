@@ -57,7 +57,7 @@ def main():
 
     try:
         # Initialize and clear faults
-        bestman.Fault_clear()
+        bestman.clear_fault()
 
         # Print States
         print_thread = threading.Thread(target=print_robot_states, args=[bestman])

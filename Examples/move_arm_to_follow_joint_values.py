@@ -1,7 +1,7 @@
 '''
 Run this script using:
 
-python move_arm_to_follow_joint_values.py 192.168.2.100 192.168.2.108 20
+python move_arm_follow_joint_values.py 192.168.2.100 192.168.2.108 20
 '''
 
 import sys
@@ -78,7 +78,7 @@ def main():
         ]
 
         # Move the arm to follow the target trajectory
-        bestman.move_arm_to_follow_joint_values(target_trajectory)
+        bestman.move_arm_follow_joint_values(target_trajectory)
         time.sleep(1)
 
     except Exception as e:

@@ -43,7 +43,7 @@ class Bestman_Real_Flexiv:
     '''
     Functions for device itself
     '''
-    def Fault_clear(self):
+    def clear_fault(self):
         # Clear fault on robot server if any
         if self.robot.isFault():
             self.log.warn("Fault occurred on robot server, trying to clear ...")
@@ -95,7 +95,6 @@ class Bestman_Real_Flexiv:
         roll, pitch, yaw = r.as_euler('xyz', degrees=False)
         return [x, y, z, roll, pitch, yaw]
 
-
     def euler_to_pose(self, position_euler):
         '''
         Convert robot pose from [x, y, z, roll, pitch, yaw] to [x, y, z, qw, qx, qy, qz].
@@ -111,7 +110,6 @@ class Bestman_Real_Flexiv:
         qx, qy, qz, qw = r.as_quat()  # Getting [qx, qy, qz, qw] from scipy
         return [x, y, z, qw, qx, qy, qz]  # Reordering to match [qw, qx, qy, qz]
     
-
     def log_command(self, timestamp, target_pos):
         '''record timestamp and target_pos'''
         with open(self.log_file, 'a') as file:
@@ -150,7 +148,6 @@ class Bestman_Real_Flexiv:
             for i, link in enumerate(self.robot_chain.links[1:]):  # Assuming the arm starts from the second link
                 print(f"Link {i + 1}: {link.name}")
 
-
     def get_arm_id(self):
         '''
         Retrieves the ID of the robot arm.
@@ -184,7 +181,6 @@ class Bestman_Real_Flexiv:
         '''
         return list(range(len(self.active_joints)))
     
-
     def get_tcp_link(self):
         '''
         Retrieves the TCP (Tool Center Point) link of the robot arm.
@@ -193,7 +189,6 @@ class Bestman_Real_Flexiv:
             str: The TCP link of the robot arm.
         '''
         return self.robot_chain.links[7].name
-
 
     def get_current_joint_values(self):
         '''
@@ -249,7 +244,7 @@ class Bestman_Real_Flexiv:
         self.robot.sendJointPosition(target_joint, target_vel, target_acc, MAX_VEL, MAX_ACC)
 
 
-    def move_arm_to_follow_joint_values(self, target_trajectory, target_vel=None, target_acc=None, MAX_VEL=None, MAX_ACC=None):
+    def move_arm_follow_joint_values(self, target_trajectory, target_vel=None, target_acc=None, MAX_VEL=None, MAX_ACC=None):
         '''
         Move arm to a few set of joint angles, considering physics.
 
@@ -284,7 +279,6 @@ class Bestman_Real_Flexiv:
 
             # Use sleep to control loop period
             time.sleep(period)
-
 
     # ----------------------------------------------------------------
     # Functions for end effector
@@ -325,7 +319,7 @@ class Bestman_Real_Flexiv:
         self.robot.sendCartesianMotionForce(end_effector_goal_pose_que, wrench, max_linear_vel, max_angular_vel)
 
 
-    def move_end_effector_to_follow_trajectory(self, targets, max_linear_vel=0.5, max_angular_vel=1.0):
+    def move_end_effector_follow_trajectory(self, targets, max_linear_vel=0.5, max_angular_vel=1.0):
         '''
         Move arm's end effector to a target position.
 
@@ -357,7 +351,6 @@ class Bestman_Real_Flexiv:
             end_effector_goal_position: The desired pose of the end effector (includes both position and orientation).
         '''
         pass
-
 
     def rotate_end_effector_tcp(self, axis, angle):
         '''

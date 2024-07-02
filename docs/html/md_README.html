@@ -73,24 +73,21 @@ $(function() {
 <ul>
 <li>Clone the Repository</li>
 </ul>
-<div class="fragment"><div class="line">git clone https://github.com/yding25/BestMan_Flexiv.git</div>
+<div class="fragment"><div class="line">cd /home/$(whoami)</div>
+<div class="line">git clone https://github.com/yding25/BestMan_Flexiv.git</div>
 </div><!-- fragment --><ul>
-<li>Integrate with flexiv_rdk Ensure you have flexiv_rdk version 0.10. You can download it from <a href="https://github.com/flexivrobotics/flexiv_rdk.git">Flexiv Robotics GitHub</a> or the <a href="https://rdk.flexiv.com/manual/getting_started.html#setup-and-run-python-rdk">Flexiv RDK</a> Manual. <div class="fragment"><div class="line">cd BestMan_Flexiv/Install</div>
-<div class="line">unzip flexiv_rdk.zip -d /home/[X]</div>
-<div class="line">mv BestMan_Flexiv /home/[X]/flexiv_rdk/</div>
-</div><!-- fragment --> Note, Replace <b>[X]</b> with your account name.</li>
 <li>Create conda environment</li>
 </ul>
 <div class="fragment"><div class="line">cd ./flexiv_rdk/BestMan_Flexiv/Install</div>
 <div class="line">conda env create -f basic_environment.yaml</div>
 </div><!-- fragment --><h2><a class="anchor" id="autotoc_md1"></a>
 🔎 Project Structure</h2>
-<p>Generate and view the project structure: </p><div class="fragment"><div class="line">tree -L 2 BestMan_Flexiv/ &gt; BestMan_Flexiv/Asset/project_structure.txt</div>
-<div class="line">cat Asset/project_structure.txt</div>
+<p>Generate and view the project structure: </p><div class="fragment"><div class="line">doxygen Doxyfile</div>
+<div class="line">firefox /home/$(whoami)/BestMan_Flexiv/docs/html/index.html</div>
 </div><!-- fragment --><h2><a class="anchor" id="autotoc_md2"></a>
 👨‍💻 Basic Demos</h2>
 <p>:shamrock: <b>Load Kitchens</b></p>
-<div class="fragment"><div class="line">python Examples/load_kitchen.py</div>
+<div class="fragment"><div class="line">python /home/$(whoami)/BestMan_Flexiv/Examples/open_gripper.py 192.168.2.100 192.168.2.108 20</div>
 </div><!-- fragment --><h2><a class="anchor" id="autotoc_md3"></a>
 📧 Contact Information</h2>
 <p>If you have any questions or need further assistance, please feel free to reach out via email:</p><ul>
