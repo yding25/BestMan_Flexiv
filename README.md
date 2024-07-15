@@ -26,7 +26,7 @@ Ensure you have flexiv_rdk version 0.10. You can download it from [Flexiv Roboti
 - Create conda environment
 
 ```
-cd ./flexiv_rdk/BestMan_Flexiv/Install
+cd /home/$(whoami)/BestMan_Flexiv/Install
 conda env create -f basic_environment.yaml
 ```
 
