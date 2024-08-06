@@ -47,17 +47,16 @@ def main():
         # Get and log current joint values and bounds
         joint_angles = bestman.get_current_joint_angles()
         bestman.log.info(f"Current joint angles: {joint_angles}")
-
         joint_bounds = bestman.get_joint_bounds()
         bestman.log.info(f"Current joint bounds: {joint_bounds}")
 
-        # pose1 for being home 1
+        # pose for being home 1
         pose1 = [0.5628906488418579, -0.08013617247343063, 0.4745604693889618, 0.0014537398237735033, -0.039826150983572006, 0.9992029070854187, 0.0023102618288248777]
         pose1 = pose_to_euler(pose1)
         bestman.move_end_effector_to_goal_pose(pose1)
         time.sleep(5)
 
-        # pose2 for detecting marker
+        # pose for detecting marker on UAV
         pose2= [0.714484453201294, 0.015231587924063206, 0.5131312012672424, 0.033157266676425934, -0.04292983189225197, 0.9984701871871948, 0.01071979384869337]
         pose2 = pose_to_euler(pose2)
         bestman.move_end_effector_to_goal_pose(pose2)
@@ -131,7 +130,7 @@ def main():
         time.sleep(3)
         bestman.open_gripper()
 
-        # pose1 for being home 2
+        # pose for being home 2
         pose_stop = [0.328906488418579, -0.08013617247343063, 0.4745604693889618, 0.0014537398237735033, -0.039826150983572006, 0.9992029070854187, 0.0023102618288248777]
         _pose_stop = pose_to_euler(pose_stop)
         bestman.move_end_effector_to_goal_pose(_pose_stop)
