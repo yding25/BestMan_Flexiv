@@ -38,7 +38,6 @@ def load_poses_from_xml(filename="saved_poses.xml"):
 
 
 
-
 def main():
     # Parse Arguments
     argparser = argparse.ArgumentParser(description="Move the robot arm to follow a trajectory.")
