@@ -16,6 +16,7 @@ import time
 import argparse
 import sys
 import os
+import xml.etree.ElementTree as ET
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(os.path.join(parent_dir, 'RoboticsToolBox'))
 from utility import quat2eulerZYX
@@ -37,6 +38,24 @@ def print_description():
     )
     print()
 
+def save_poses_to_xml(poses, filename="saved_poses4.xml"):
+    """
+    Save the recorded poses to an XML file.
+
+    Args:
+        poses (list): List of recorded poses.
+        filename (str): Name of the XML file to save the poses.
+    """
+    root = ET.Element("Poses")
+
+    for i, pose in enumerate(poses):
+        pose_element = ET.SubElement(root, "Pose", id=str(i+1))
+        ET.SubElement(pose_element, "Position", x=str(pose[0]), y=str(pose[1]), z=str(pose[2]))
+        ET.SubElement(pose_element, "Orientation", qx=str(pose[3]), qy=str(pose[4]), qz=str(pose[5]), qw=str(pose[6]))
+
+    tree = ET.ElementTree(root)
+    tree.write(filename, encoding="utf-8", xml_declaration=True)
+    print(f"Saved poses to {filename}")
 
 def main():
     # Program Setup
@@ -116,6 +135,18 @@ def main():
                 log.warn(
                     "Hold down the enabling button on the motion bar to activate free drive"
                 )
+
+                # Record 500 poses
+                while len(saved_poses) < 150:
+                    robot.getRobotStates(robot_states)
+                    saved_poses.append(robot_states.tcpPose)
+                    log.info("New pose saved: " + str(robot_states.tcpPose))
+                    log.info("Number of saved poses: " + str(len(saved_poses)))
+                    time.sleep(0.05)  # Delay to ensure system is not overwhelmed
+
+                # Save poses to XML
+                save_poses_to_xml(saved_poses)
+
             # Save current robot pose
             elif input_buffer == "r":
                 if not robot.isBusy():
@@ -126,6 +157,7 @@ def main():
                 saved_poses.append(robot_states.tcpPose)
                 log.info("New pose saved: " + str(robot_states.tcpPose))
                 log.info("Number of saved poses: " + str(len(saved_poses)))
+
             # Reproduce recorded poses
             elif input_buffer == "e":
                 if len(saved_poses) == 0:
@@ -187,6 +219,6 @@ def main():
         # Print exception error message
         log.error(str(e))
 
-
 if __name__ == "__main__":
     main()
+

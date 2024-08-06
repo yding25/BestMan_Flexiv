@@ -9,7 +9,7 @@ import os
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(os.path.join(parent_dir, 'RoboticsToolBox'))
 import pyRobotiqGripper
-from Bestman_sim_flexiv import *
+from Bestman_flexiv import *
 
 def main():
     # Parse Arguments
@@ -69,7 +69,8 @@ def main():
 
         # Go back to home pose
         bestman.go_home()
-        time.sleep(1)
+        time.sleep(10)
+
 
     except Exception as e:
         # Log any exceptions that occur

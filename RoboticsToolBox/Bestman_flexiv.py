@@ -284,7 +284,7 @@ class Bestman_Real_Flexiv:
     # Functions for end effector
     # ----------------------------------------------------------------
 
-    def move_end_effector_to_goal_pose(self, end_effector_goal_pose, max_linear_vel=0.5, max_angular_vel=1.0):
+    def move_end_effector_to_goal_pose(self, end_effector_goal_pose, max_linear_vel=0.1, max_angular_vel=0.5):
         '''
         Move arm's end effector to a target position.
 

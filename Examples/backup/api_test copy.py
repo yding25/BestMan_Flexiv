@@ -4,7 +4,7 @@ import os
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(os.path.join(parent_dir, 'RoboticsToolBox'))
 
-from Bestman_sim_flexiv import *
+from Bestman_flexiv import *
 
 def main():
     # Parse Arguments

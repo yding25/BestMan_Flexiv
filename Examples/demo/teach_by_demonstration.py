@@ -97,6 +97,9 @@ def main():
         print("[r] - record current robot pose")
         print("[e] - finish recording and start execution")
 
+
+        bestman.update_robot_states()
+        robot_states = bestman.robot_states
         # User input polling
         input_buffer = ""
         while True:
@@ -116,6 +119,10 @@ def main():
                 log.warn(
                     "Hold down the enabling button on the motion bar to activate free drive"
                 )
+
+
+
+        
             # Save current robot pose
             elif input_buffer == "r":
                 if not robot.isBusy():
