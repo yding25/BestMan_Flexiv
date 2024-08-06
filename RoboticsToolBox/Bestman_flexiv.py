@@ -1,7 +1,5 @@
 import numpy as np
-import argparse
 import time
-import datetime
 import ikpy
 import serial
 import serial.tools.list_ports
@@ -10,16 +8,13 @@ import pyRobotiqGripper
 from ikpy.chain import Chain
 from ikpy.inverse_kinematics import inverse_kinematic_optimization
 from scipy.spatial.transform import Rotation as R
-from utility import quat2eulerZYX
-from utility import parse_pt_states
-from utility import list2str
+import RoboticsToolBox.utils as utils
 import sys
 import os
 current_dir = os.path.dirname(os.path.abspath(__file__))
 flexiv_rdk_path = os.path.join(current_dir, "../Install/flexiv_rdk/lib_py")
 sys.path.insert(0, flexiv_rdk_path)
 import flexivrdk
-import threading
 
 
 class Bestman_Real_Flexiv:
@@ -80,36 +75,6 @@ class Bestman_Real_Flexiv:
         self.robot.setMode(self.mode.NRT_PRIMITIVE_EXECUTION)
         self.robot.executePrimitive("Home()")
 
-    def pose_to_euler(self, pose):
-        '''
-        Convert robot pose from a list [x, y, z, qw, qx, qy, qz] to [x, y, z] and Euler angles.
-        
-        Parameters:
-        pose: list of 7 floats - [x, y, z, qw, qx, qy, qz]
-        
-        Returns:
-        tuple: (x, y, z, roll, pitch, yaw) where (x, y, z) is the position and (roll, pitch, yaw) are the Euler angles in radians.
-        '''
-        x, y, z, qw, qx, qy, qz = pose
-        r = R.from_quat([qx, qy, qz, qw])  # Reordering to match scipy's [qx, qy, qz, qw]
-        roll, pitch, yaw = r.as_euler('xyz', degrees=False)
-        return [x, y, z, roll, pitch, yaw]
-
-    def euler_to_pose(self, position_euler):
-        '''
-        Convert robot pose from [x, y, z, roll, pitch, yaw] to [x, y, z, qw, qx, qy, qz].
-        
-        Parameters:
-        position_euler: list of 6 floats - [x, y, z, roll, pitch, yaw]
-        
-        Returns:
-        list: [x, y, z, qw, qx, qy, qz]
-        '''
-        x, y, z, roll, pitch, yaw = position_euler
-        r = R.from_euler('xyz', [roll, pitch, yaw], degrees=False)
-        qx, qy, qz, qw = r.as_quat()  # Getting [qx, qy, qz, qw] from scipy
-        return [x, y, z, qw, qx, qy, qz]  # Reordering to match [qw, qx, qy, qz]
-    
     def log_command(self, timestamp, target_pos):
         '''record timestamp and target_pos'''
         with open(self.log_file, 'a') as file:
@@ -294,7 +259,7 @@ class Bestman_Real_Flexiv:
             max_angular_vel (float, optional): Maximum angular velocity. Defaults to 1.0.
         '''
         wrench = [0.0] * 6
-        end_effector_goal_pose_que= self.euler_to_pose(end_effector_goal_pose)
+        end_effector_goal_pose_que= utils.euler_to_pose(end_effector_goal_pose)
         self.robot.setMode(self.mode.NRT_CARTESIAN_MOTION_FORCE)
         self.robot.sendCartesianMotionForce(end_effector_goal_pose_que, wrench, max_linear_vel, max_angular_vel)
 
@@ -309,7 +274,7 @@ class Bestman_Real_Flexiv:
             max_angular_vel (float, optional): Maximum angular velocity. Defaults to 1.0.
             contact_wrench: Maximum contact wrench (force and moment) for contact detection, [fx, fy, fz, mx, my, mz]
         '''
-        end_effector_goal_pose_que = self.euler_to_pose(end_effector_goal_pose)
+        end_effector_goal_pose_que = utils.euler_to_pose(end_effector_goal_pose)
         self.robot.setMode(self.mode.NRT_CARTESIAN_MOTION_FORCE)
 
         # set max contact wrench
@@ -369,7 +334,7 @@ class Bestman_Real_Flexiv:
         
         current_pose = self.get_current_end_effector_pose()
         current_pose[axis_index] += angle
-        new_pose = self.euler_to_pose(current_pose)
+        new_pose = utils.euler_to_pose(current_pose)
         
         self.robot.setMode(self.mode.NRT_CARTESIAN_MOTION_FORCE_BASE)
         self.robot.sendCartesianMotionForce(new_pose)

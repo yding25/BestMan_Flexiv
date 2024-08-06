@@ -9,9 +9,8 @@ __copyright__ = "Copyright (C) 2016-2021 Flexiv Ltd. All Rights Reserved."
 __author__ = "Flexiv"
 
 import math
-# pip install scipy
 from scipy.spatial.transform import Rotation as R
-
+import xml.etree.ElementTree as ET
 
 def quat2eulerZYX(quat, degree=False):
     """
@@ -85,3 +84,55 @@ def parse_pt_states(pt_states, parse_target):
             return words[-1]
 
     return ""
+
+def load_poses_from_xml(filename="saved_poses.xml"):
+    """
+    Load poses from an XML file.
+
+    Args:
+        filename (str): Name of the XML file to load the poses.
+
+    Returns:
+        list: List of poses with positions and orientations.
+    """
+    tree = ET.parse(filename)
+    root = tree.getroot()
+
+    poses = []
+    for pose in root.findall('Pose'):
+        position = pose.find('Position')
+        orientation = pose.find('Orientation')
+        pose_data = [float(position.get('x')), float(position.get('y')), float(position.get('z')), float(orientation.get('qx')), float(orientation.get('qy')), float(orientation.get('qz')), float(orientation.get('qw'))]
+        poses.append(pose_data)
+
+    return poses
+
+def pose_to_euler(pose):
+    '''
+    Convert robot pose from a list [x, y, z, qw, qx, qy, qz] to [x, y, z] and Euler angles.
+    
+    Parameters:
+    pose: list of 7 floats - [x, y, z, qw, qx, qy, qz]
+    
+    Returns:
+    tuple: (x, y, z, roll, pitch, yaw) where (x, y, z) is the position and (roll, pitch, yaw) are the Euler angles in radians.
+    '''
+    x, y, z, qw, qx, qy, qz = pose
+    r = R.from_quat([qx, qy, qz, qw])  # Reordering to match scipy's [qx, qy, qz, qw]
+    roll, pitch, yaw = r.as_euler('xyz', degrees=False)
+    return [x, y, z, roll, pitch, yaw]
+
+def euler_to_pose(position_euler):
+    '''
+    Convert robot pose from [x, y, z, roll, pitch, yaw] to [x, y, z, qw, qx, qy, qz].
+    
+    Parameters:
+    position_euler: list of 6 floats - [x, y, z, roll, pitch, yaw]
+    
+    Returns:
+    list: [x, y, z, qw, qx, qy, qz]
+    '''
+    x, y, z, roll, pitch, yaw = position_euler
+    r = R.from_euler('xyz', [roll, pitch, yaw], degrees=False)
+    qx, qy, qz, qw = r.as_quat()  # Getting [qx, qy, qz, qw] from scipy
+    return [x, y, z, qw, qx, qy, qz]  # Reordering to match [qw, qx, qy, qz]
