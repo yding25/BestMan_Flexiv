@@ -61,7 +61,7 @@ def main():
         pose2 = pose_to_euler(pose2)
         bestman.move_end_effector_to_goal_pose(pose2)
         time.sleep(5)
-
+        
         # Marker detection and transformation
         camera = Camera(device_id='239722070506')
         marker_positions = camera.get_marker_positions(debug=True)
@@ -84,7 +84,7 @@ def main():
             print('Error: No markers detected.')
 
         # TODO: manully revise the marker pose
-        pose_to_go = [pos_marker_world[0][0] - 0.055, pos_marker_world[0][1] + 0.04 , 0.36, 0.033157266676425934, -0.04292983189225197, 0.9984701871871948, 0.01071979384869337]
+        pose_to_go = [pos_marker_world[0][0] - 0.052, pos_marker_world[0][1] + 0.052 , 0.365, 0.033157266676425934, -0.04292983189225197, 0.9984701871871948, 0.01071979384869337]
         print("pose to go is: ",pose_to_go)
        
         # activate gripper
@@ -119,7 +119,8 @@ def main():
         time.sleep(5)
 
         # move cup on top of UAV
-        pose_to_go_top = [pos_marker_world[0][0] - 0.08, pos_marker_world[0][1] + 0.04 , 0.43, 0.033157266676425934, -0.04292983189225197, 0.9984701871871948, 0.01071979384869337]
+        # pose_to_go_top = [pos_marker_world[0][0] - 0.08, pos_marker_world[0][1] + 0.04, 0.43, 0.033157266676425934, -0.04292983189225197, 0.9984701871871948, 0.01071979384869337]
+        pose_to_go_top = [pos_marker_world[0][0] - 0.07, pos_marker_world[0][1] + 0.04, 0.43, 0.033157266676425934, -0.04292983189225197, 0.9984701871871948, 0.01071979384869337]
         _pose_to_go_top = pose_to_euler(pose_to_go_top)
         bestman.move_end_effector_to_goal_pose(_pose_to_go_top)
         time.sleep(3)

@@ -23,10 +23,16 @@ class Camera:
         
         # Get the stream profile and camera intrinsics
         stream = self.profile.get_stream(rs.stream.color)
+
+        # debug
         intrinsics = stream.as_video_stream_profile().get_intrinsics()
-        self.camera_matrix = np.array([[intrinsics.fx, 0, intrinsics.ppx], 
-                                       [0, intrinsics.fy, intrinsics.ppy], 
-                                       [0, 0, 1]], dtype=float)
+        self.camera_matrix_test = np.array([[intrinsics.fx, 0, intrinsics.ppx], 
+                                      [0, intrinsics.fy, intrinsics.ppy], 
+                                      [0, 0, 1]], dtype=float)
+        print(f'self.camera_matrix_test:{self.camera_matrix_test}')
+
+        #TODO: camera matrix is wrong
+        self.camera_matrix = np.array([[607.168, 0, 325.575], [0, 606.94, 325.575], [0, 0, 1]], dtype=float)
         self.dist_coeffs = np.zeros((4, 1))  # Assuming no lens distortion
 
         # Load the predefined dictionary
