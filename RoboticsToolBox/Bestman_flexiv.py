@@ -8,15 +8,19 @@ import pyRobotiqGripper
 from ikpy.chain import Chain
 from ikpy.inverse_kinematics import inverse_kinematic_optimization
 from scipy.spatial.transform import Rotation as R
-import RoboticsToolBox.utils as utils
+from utils import euler_to_pose
+from utils import pose_to_euler
+from utils import parse_pt_states
 import sys
+
 import os
 current_dir = os.path.dirname(os.path.abspath(__file__))
 flexiv_rdk_path = os.path.join(current_dir, "../Install/flexiv_rdk/lib_py")
 sys.path.insert(0, flexiv_rdk_path)
 import flexivrdk
-
-
+print(sys.path)
+sys.path.append("/home/jzj/jzj/BestMan_Flexiv")
+import RoboticsToolBox.utils as utils
 class Bestman_Real_Flexiv:
     def __init__(self, robot_ip, local_ip, frequency):
         # Initialize the robot and gripper with the provided IPs and frequency
@@ -34,6 +38,7 @@ class Bestman_Real_Flexiv:
             if isinstance(joint, ikpy.link.URDFLink) and (joint.joint_type == 'revolute' or joint.joint_type == 'prismatic')
         ]
         self.log_file = 'command_log.tum'
+        self.gripper_state = None
 
     '''
     Functions for device itself
@@ -496,6 +501,17 @@ class Bestman_Real_Flexiv:
         else:
             print("No gripper detected.")
     
+    def get_gripper_state(self):
+        '''
+        Retrieves the state of the gripper.
+
+        Returns:
+            dict: A dictionary containing the state of the gripper.
+        '''
+        return self.gripper.getPosition()
+    
+
+
     def gripper_goto(self, value, speed=255, force=255):
         '''
         Moves the gripper to a specified position with given speed and force.
@@ -518,7 +534,24 @@ class Bestman_Real_Flexiv:
     def open_gripper(self):
         ''' Opens the gripper to its maximum position with maximum speed and force. '''
         self.gripper_goto(value=0, speed=255, force=255)
+        self.gripper_state = 0
 
     def close_gripper(self):
         '''Closes the gripper to its minimum position with maximum speed and force.'''
         self.gripper_goto(value=255, speed=255, force=255)
+        self.gripper_state = 1
+    
+    def pose_to_euler(self, pose):
+        '''
+        Convert robot pose from a list [x, y, z, qw, qx, qy, qz] to [x, y, z] and Euler angles.
+        
+        Parameters:
+        pose: list of 7 floats - [x, y, z, qw, qx, qy, qz]
+        
+        Returns:
+        tuple: (x, y, z, roll, pitch, yaw) where (x, y, z) is the position and (roll, pitch, yaw) are the Euler angles in radians.
+        '''
+        x, y, z, qw, qx, qy, qz = pose
+        r = R.from_quat([qx, qy, qz, qw])  # Reordering to match scipy's [qx, qy, qz, qw]
+        roll, pitch, yaw = r.as_euler('xyz', degrees=False)
+        return [x, y, z, roll, pitch, yaw]

@@ -1,4 +1,4 @@
-name: flexiv
+name: ACT
 channels:
   - defaults
 dependencies:
@@ -31,4 +31,4 @@ dependencies:
       - pyserial==3.5
       - scipy==1.10.1
       - sympy==1.12.1
-prefix: /home/yan/anaconda3/envs/flexiv
+prefix: /home/jzj/anaconda3/envs/ACT

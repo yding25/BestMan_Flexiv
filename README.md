@@ -44,6 +44,30 @@ firefox /home/$(whoami)/BestMan_Flexiv/docs/html/index.html
 python /home/$(whoami)/BestMan_Flexiv/Examples/open_gripper.py 192.168.2.100 192.168.2.108 20
 ```
 
+
+## 👨‍💻 Control flexiv with spacemouse
+control arm with 3Dspacemouse for data collection
+- set permissions for spacemouse automatically
+1. create new udev rule file
+```
+sudo vim /etc/udev/rules.d/99-spacemouse.rules
+```
+2. add the following lines in the file
+```
+SUBSYSTEM=="input", GROUP="input", MODE="0666"
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0666", GROUP="plugdev"
+ATTRS{idVendor}=="256f", ATTRS{idProduct}=="c62e", MODE="0666", GROUP="plugdev"
+```
+3. save and exit
+4. reload udev rule
+```
+sudo udevadm control --reload-rules
+```
+- starting the control of the spacemouse
+```
+python move_arm_with_spacemouse.py 192.168.2.100 192.168.2.108 20
+```
+
 ## 📧 Contact Information
 
 If you have any questions or need further assistance, please feel free to reach out via email:
@@ -54,3 +78,5 @@ If you have any questions or need further assistance, please feel free to reach 
 ##  :handshake: Reference
 - [IKPy’s documentation](https://ikpy.readthedocs.io/en/latest/index.html)
 - [Flexiv RDK APIs](https://rdk.flexiv.cn/api/index.html)
+
+

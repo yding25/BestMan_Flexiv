@@ -10,7 +10,7 @@ parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(os.path.join(parent_dir, 'RoboticsToolBox'))
 import pyRobotiqGripper
 from Bestman_flexiv import *
-
+import argparse
 def main():
     # Parse Arguments
     argparser = argparse.ArgumentParser(description="Move the robot arm to follow a trajectory.")
@@ -95,7 +95,8 @@ def main():
             [0.6095121502876282, 0.056209687143564224, 0.23338516056537628, 0.41905108094215393, -0.5604040026664734, 0.6283918023109436, -0.33980485796928406],
             [0.6121770143508911, 0.04117409512400627, 0.2725994288921356, 0.4189033806324005, -0.5498623847961426, 0.6234208345413208, -0.36540088057518005]
         ]
-
+        current_pos = bestman.get_current_end_effector_pose()
+        target
         bestman.move_end_effector_follow_trajectory(target_trajectory, max_linear_vel=0.1, max_angular_vel=0.5)
         time.sleep(1)
 

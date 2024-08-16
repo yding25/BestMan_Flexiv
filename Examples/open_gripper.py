@@ -1,6 +1,6 @@
 '''
 Run this script using:
-python /home/$(whoami)/BestMan_Flexiv/Examples/open_gripper.py 192.168.2.100 192.168.2.108 20
+python open_gripper.py 192.168.2.100 192.168.2.108 20
 '''
 
 import sys
@@ -8,6 +8,8 @@ import os
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(os.path.join(parent_dir, 'RoboticsToolBox'))
 import pyRobotiqGripper
+import argparse
+import time
 from Bestman_flexiv import *
 
 def main():

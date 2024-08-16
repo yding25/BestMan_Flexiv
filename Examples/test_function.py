@@ -1,7 +1,7 @@
 '''
 Run this script using:
 
-python move_arm_to_home.py 192.168.2.100 192.168.2.108 20
+python test_function.py 192.168.2.100 192.168.2.108 20
 '''
 
 import sys
@@ -10,8 +10,9 @@ parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(os.path.join(parent_dir, 'RoboticsToolBox'))
 import pyRobotiqGripper
 from Bestman_flexiv import *
+import numpy as np
 import argparse
-
+import time
 def main():
     # Parse Arguments
     argparser = argparse.ArgumentParser(description="Move the robot arm to follow a trajectory.")
@@ -62,16 +63,15 @@ def main():
         log.info("Robot is now operational")
 
         # Get and log current joint values and bounds
-        joint_angles = bestman.get_current_joint_angles()
-        log.info(f"Current joint values: {joint_angles}")
 
-        joint_bounds = bestman.get_joint_bounds()
-        log.info(f"Current joint bounds: {joint_bounds}")
-
-        # Go back to home pose
-        bestman.go_home()
-        time.sleep(10)
-
+        while True:
+            #input three float as delta roll pitch yaw
+            droll, dpitch, dyaw = map(float, input("请输入三个浮点数，用空格分隔: ").split())
+            current_pos = bestman.get_current_end_effector_pose()
+            print(current_pos[:3] +  [180 * current_pos[3] / np.pi] + [180 * current_pos[4] / np.pi] + [180 * current_pos[5] / np.pi])
+            target_pos = current_pos[:3] + [current_pos[3] + droll, current_pos[4] + dpitch, current_pos[5] + dyaw]            
+            bestman.move_end_effector_to_goal_pose(target_pos, max_linear_vel=0.1, max_angular_vel=0.3)
+            time.sleep(1.5)
 
     except Exception as e:
         # Log any exceptions that occur
