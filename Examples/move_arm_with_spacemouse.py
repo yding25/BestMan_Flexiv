@@ -1,6 +1,6 @@
 '''
 Run this script using:
-python move_arm_with_spacemouse.py 192.168.2.100 192.168.2.108 20
+python move_arm_with_spacemouse.py 
 '''
 
 
@@ -25,10 +25,10 @@ def main():
     # argparser.add_argument("--controller-type", type=str, default="OSC_POSE")
 
     argparser.add_argument("--vendor-id", type=int, default=9583)
-    argparser.add_argument("--product-id", type=int, default=50734)
-    argparser.add_argument("robot_ip", help="IP address of the robot server")
-    argparser.add_argument("local_ip", help="IP address of this PC")
-    argparser.add_argument("frequency", type=int, help="Command frequency, 1 to 200 [Hz]")
+    argparser.add_argument("--product-id", type=int, default=50741)
+    argparser.add_argument("--robot_ip", type=str, help="IP address of the robot server", default="192.168.2.100")
+    argparser.add_argument("--local_ip", type=str, help="IP address of this PC", default="192.168.2.108")
+    argparser.add_argument("--frequency", type=int, help="Command frequency, 1 to 200 [Hz]", default=20)
     # Optional arguments
     argparser.add_argument("--hold", action="store_true", help="Robot holds current joint positions, otherwise do a sine-sweep")
     args = argparser.parse_args()
@@ -66,43 +66,12 @@ def main():
                 )
 
         log.info("Robot is now operational")
+        bestman.connect_gripper()
+        time.sleep(1)
+        bestman.open_gripper()
+        time.sleep(1)
+        move_with_spacemouse(action_num=2000, bestman=bestman, product_id=50741)
 
-        move_with_spacemouse(bestman)
-        #connect gripper
-    #     bestman.connect_gripper()
-    #     time.sleep(1)
-    #     bestman.open_gripper()
-    #     time.sleep(1)
-    #     last_gripper_state = -1.0
-
-    #     #initial the pose
-    #     bestman.go_home()
-    #     time.sleep(3)
-        
-    #     # Get and log current joint values and bounds
-    #     for i in range(1000):
-    #         # start_time = time.time_ns()
-
-    #         action, grasp = input2action(
-    #             device=device
-    #         )
-    #         print(action)
-    #         action[3] = -action[3]
-    #         action[4] = -action[4]
-    #         current_gripper_state = action[6]
-    #         if current_gripper_state != last_gripper_state:
-    #             if current_gripper_state == 1:
-    #                 bestman.close_gripper()
-    #             else:
-    #                 bestman.open_gripper()
-    #             last_gripper_state = current_gripper_state
-    #         current_pos = bestman.get_current_end_effector_pose()
-    #         target_pos = current_pos + action[0:6]
-    #         print(target_pos, action[6])
-    #         bestman.move_end_effector_to_goal_pose(target_pos, max_linear_vel=0.05, max_angular_vel=0.3)
-    #         time.sleep(0.05)
-            
-    #         # end_time = time.time_ns()
 
     except Exception as e:
         # Log any exceptions that occur

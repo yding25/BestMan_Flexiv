@@ -15,7 +15,8 @@ For Linux support, you can find open-source Linux drivers and SDKs online.
     See http://spacenav.sourceforge.net/
 
 """
-
+import pyspacemouse
+import time
 import threading
 import time
 from collections import namedtuple
@@ -27,6 +28,7 @@ try:
     import hid
     # for device_info in hid.enumerate():
     # # 打印每个设备的信息
+    #     print("="*40)
     #     print(f"Vendor ID: {device_info['vendor_id']:04x}")
     #     print(f"Product ID: {device_info['product_id']:04x}")
     #     print(f"Product: {device_info['product_string']}")
@@ -41,6 +43,17 @@ except ModuleNotFoundError as exc:
     ) from exc
 
 # from deoxys.utils.transform_utils import rotation_matrix
+
+def button_0(state, buttons, pressed_buttons):
+    print("Button:", pressed_buttons)
+
+
+def button_0_1(state, buttons, pressed_buttons):
+    print("Buttons:", pressed_buttons)
+
+
+def someButton(state, buttons):
+    print("Some button")
 
 
 def rotation_matrix(angle, direction, point=None):
@@ -242,6 +255,7 @@ class SpaceMouse:
     ):
 
         print("Opening SpaceMouse device")
+        self.product_id = product_id
         self.device = hid.device()
         self.device.open(vendor_id, product_id)  # SpaceMouse
 
@@ -254,7 +268,6 @@ class SpaceMouse:
         # 6-DOF variables
         self.x, self.y, self.z = 0, 0, 0
         self.roll, self.pitch, self.yaw = 0, 0, 0
-
         self._display_controls()
 
         self.single_click_and_hold = False
@@ -265,9 +278,12 @@ class SpaceMouse:
         self._enabled = False
 
         # launch a new listener thread to listen to SpaceMouse
+      
         self.thread = threading.Thread(target=self.run)
         self.thread.daemon = True
         self.thread.start()
+
+            
 
     @staticmethod
     def _display_controls():
@@ -303,6 +319,11 @@ class SpaceMouse:
         self._control = np.zeros(6)
         # Reset grasp
         self.single_click_and_hold = False
+
+    def button_down(self):
+        self.single_click_and_hold = True
+
+
 
     def start_control(self):
         """
@@ -342,48 +363,91 @@ class SpaceMouse:
         """Listener method that keeps pulling new messages."""
 
         t_last_click = -1
+        # while True:
+        #     d = self.device.read(13)
+        #     print(d)
 
-        while True:
-            d = self.device.read(13)
-            if d is not None and self._enabled:
+        #for wireless spacemouse:
+        if self.product_id == 50734:
+            while True:
+                d = self.device.read(13)
+                if d is not None and self._enabled:
+                    print(d)
+                    if d[0] == 1 and self.product_id == 50734:  ## readings from 6-DoF sensor
+                        self.y = convert(d[1], d[2])
+                        self.x = convert(d[3], d[4])
+                        self.z = convert(d[5], d[6]) * -1.0
 
-                if d[0] == 1:  ## readings from 6-DoF sensor
-                    self.y = convert(d[1], d[2])
-                    self.x = convert(d[3], d[4])
-                    self.z = convert(d[5], d[6]) * -1.0
+                        self.roll = convert(d[7], d[8])
+                        self.pitch = convert(d[9], d[10])
+                        self.yaw = convert(d[11], d[12])
 
-                    self.roll = convert(d[7], d[8])
-                    self.pitch = convert(d[9], d[10])
-                    self.yaw = convert(d[11], d[12])
+                        self._control = [
+                            self.x,
+                            self.y,
+                            self.z,
+                            self.roll,
+                            self.pitch,
+                            self.yaw,
+                        ]
+                        # print(self._control)
+                    elif d[0]  == 1:
+                        self.x = scale_to_control(d[1])
+                        self.y = scale_to_control(d[2])
+                        self.z = scale_to_control(d[3])
 
+                        self.roll = scale_to_control(d[4])
+                        self.pitch = scale_to_control(d[5])
+                        self.yaw = scale_to_control(d[6])
+
+                        self._control = [
+                            self.x,
+                            self.y,
+                            self.z,
+                            self.roll,
+                            self.pitch,
+                            self.yaw,
+                        ]
+                        print(self._control)
+                    elif d[0] == 3:  ## readings from the side buttons
+
+                        # press left button
+                        if d[1] == 1:
+                            t_click = time.time()
+                            elapsed_time = t_click - t_last_click
+                            t_last_click = t_click
+                            self.single_click_and_hold = True
+
+                        # release left button
+                        if d[1] == 0:
+                            self.single_click_and_hold = False
+
+                        # right button is for reset
+                        if d[1] == 2:
+                            self._reset_state = 1
+                            self._enabled = False
+                            self._reset_internal_state()
+                            
+        elif self.product_id == 50741:
+            success = pyspacemouse.open()
+            if success:
+                while True:
+                    state = pyspacemouse.read()
                     self._control = [
-                        self.x,
-                        self.y,
-                        self.z,
-                        self.roll,
-                        self.pitch,
-                        self.yaw,
-                    ]
-
-                elif d[0] == 3:  ## readings from the side buttons
-
-                    # press left button
-                    if d[1] == 1:
-                        t_click = time.time()
-                        elapsed_time = t_click - t_last_click
-                        t_last_click = t_click
+                            -state.y,
+                            state.x,
+                            state.z,
+                            -state.roll,
+                            -state.pitch,
+                            -state.yaw,
+                        ]
+                    button = state.buttons
+                    if button[0] == 1:
                         self.single_click_and_hold = True
-
-                    # release left button
-                    if d[1] == 0:
+                    else:
                         self.single_click_and_hold = False
-
-                    # right button is for reset
-                    if d[1] == 2:
-                        self._reset_state = 1
-                        self._enabled = False
-                        self._reset_internal_state()
-
+                    # print(state.x)
+                    time.sleep(0.01)
     @property
     def control(self):
         """
@@ -405,6 +469,7 @@ class SpaceMouse:
         if self.single_click_and_hold:
             return 1.0
         return 0
+
 
 
 def input2action(device, controller_type="OSC_POSE", robot_name="Panda", gripper_dof=1):
@@ -459,8 +524,8 @@ def input2action(device, controller_type="OSC_POSE", robot_name="Panda", gripper
 
 
 
-def move_with_spacemouse(bestman, action_num=1000):
-    device = SpaceMouse(vendor_id=9583, product_id=50734)
+def move_with_spacemouse(bestman, action_num=1000, vendor_id=9583, product_id=50741):
+    device = SpaceMouse(vendor_id=vendor_id, product_id=product_id)
     device.start_control()
 
     log = flexivrdk.Log()
@@ -468,48 +533,71 @@ def move_with_spacemouse(bestman, action_num=1000):
 
     # robot_interface._state_buffer = []
     try:
-        #connect gripper
-        bestman.connect_gripper()
         time.sleep(1)
-        bestman.open_gripper()
-        time.sleep(1)
-        last_gripper_state = -1.0
-
-
-        #initial the pose
-        # bestman.go_home()
-        # time.sleep(3)
-        
+        last_gripper_state = 0
         #starting control
-        for i in range(action_num):
-            # start_time = time.time_ns()
-            action, grasp = input2action(
-                device=device
-            )
+        #for wireless spacemouse:
+        if product_id == 50734:
 
-            current_gripper_state = action[6]
-            if current_gripper_state != last_gripper_state:
-                if current_gripper_state == 1:
-                    bestman.close_gripper()
-                else:
-                    bestman.open_gripper()
-                last_gripper_state = current_gripper_state
-            current_pos = bestman.get_current_end_effector_pose()
-            current_euler = current_pos[3:]
-            # print(current_euler)
-            action_euler = action[3:6]
-            R_current = R.from_euler('xyz', current_euler)
-            R_action = R.from_euler('xyz', action_euler)
-            R_target = R_action * R_current
-            euler_angles_final = R_target.as_euler('xyz')
+            log = flexivrdk.Log()
+            for i in range(action_num):
+                # start_time = time.time_ns()
+                action, grasp = input2action(
+                    device=device
+                )
+                if i == action_num-1:
+                    action[0:6] = [0.0] * 6
+                current_gripper_state = action[6]
+                if current_gripper_state != last_gripper_state:
+                    if current_gripper_state == 1:
+                        bestman.close_gripper()
+                    else:
+                        bestman.open_gripper()
+                    last_gripper_state = current_gripper_state
+                current_pos = bestman.get_current_end_effector_pose()
+                current_euler = current_pos[3:]
 
-            target_pos = list(current_pos[0:3] + action[0:3]) + list(euler_angles_final)
+                action_euler = action[3:6]
+                R_current = R.from_euler('xyz', current_euler)
+                R_action = R.from_euler('xyz', action_euler)
+                R_target = R_action * R_current
+                euler_angles_final = R_target.as_euler('xyz')
 
-            # print(target_pos, action[6])
+                target_pos = list(current_pos[0:3] + action[0:3]) + list(euler_angles_final)
+                bestman.move_end_effector_to_goal_pose(target_pos, max_linear_vel=0.1, max_angular_vel=0.5)
+                time.sleep(0.05)
+        elif product_id == 50741:
+            for i in range(action_num):
+                state = pyspacemouse.read()
+                controller = [
+                            -state.y / 3.0,
+                            state.x / 3.0,
+                            state.z / 3.0,
+                            -state.roll / 3.0,
+                            -state.pitch / 3.0,
+                            -state.yaw / 3.0,
+                        ]
+                if i == action_num - 1:
+                    controller = [0.0] * 6
+                current_gripper_state = state.buttons[0]
+                if current_gripper_state != last_gripper_state:
+                    if current_gripper_state == 1:
+                        bestman.close_gripper()
+                    else:
+                        bestman.open_gripper()
+                    last_gripper_state = current_gripper_state
+                current_pos = bestman.get_current_end_effector_pose()
+                current_euler = current_pos[3:]
+                action_euler = controller[3:6]
+                R_current = R.from_euler('xyz', current_euler)
+                R_action = R.from_euler('xyz', action_euler)
+                R_target = R_action * R_current
+                euler_angles_final = R_target.as_euler('xyz')
 
-            bestman.move_end_effector_to_goal_pose(target_pos, max_linear_vel=0.1, max_angular_vel=0.5)
-            time.sleep(0.05)
-        
+                target_pos = list(np.array(current_pos[0:3]) + np.array(controller[0:3])) + list(euler_angles_final)
+                bestman.move_end_effector_to_goal_pose(target_pos, max_linear_vel=0.1, max_angular_vel=0.5)
+                time.sleep(0.02)
+
     except Exception as e:
         # Log any exceptions that occur
         log.error(str(e))
@@ -517,7 +605,7 @@ def move_with_spacemouse(bestman, action_num=1000):
 
 if __name__ == "__main__":
 
-    space_mouse = SpaceMouse(product_id=50770)
+    space_mouse = SpaceMouse(product_id=50741)
     for i in range(100):
         print(space_mouse.control, space_mouse.control_gripper)
         time.sleep(0.02)
