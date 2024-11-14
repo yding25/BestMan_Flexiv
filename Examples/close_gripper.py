@@ -7,7 +7,7 @@ import sys
 import os
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(os.path.join(parent_dir, 'RoboticsToolBox'))
-import pyRobotiqGripper
+import argparse
 from Bestman_flexiv import *
 
 def main():

@@ -1,16 +1,14 @@
 #!/usr/bin/env python
 
-"""intermediate4_teach_by_demonstration.py
-
+"""
 This tutorial shows a demo implementation for teach by demonstration: free-drive the robot and
 record a series of Cartesian poses, which are then reproduced by the robot.
 
 Run this script using:
-python intermediate4_teach_by_demonstration.py 192.168.2.100 192.168.2.108
-"""
+python collect_demo.py 192.168.2.100 192.168.2.108 200
 
-__copyright__ = "Copyright (C) 2016-2021 Flexiv Ltd. All Rights Reserved."
-__author__ = "Flexiv"
+200: maximum number of poses
+"""
 
 import time
 import argparse
@@ -19,9 +17,7 @@ import os
 import xml.etree.ElementTree as ET
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(os.path.join(parent_dir, 'RoboticsToolBox'))
-from utility import quat2eulerZYX
-from utility import list2str
-from utility import parse_pt_states
+from RoboticsToolBox.utils import quat2eulerZYX, list2str, parse_pt_states
 from Bestman_flexiv import *
 
 # Maximum contact wrench [fx, fy, fz, mx, my, mz] [N][Nm]
@@ -38,7 +34,7 @@ def print_description():
     )
     print()
 
-def save_poses_to_xml(poses, filename="saved_poses4.xml"):
+def save_poses_to_xml(poses, filename="recorded_traj/saved_poses4.xml"):
     """
     Save the recorded poses to an XML file.
 
@@ -64,8 +60,9 @@ def main():
     argparser = argparse.ArgumentParser()
     argparser.add_argument("robot_ip", help="IP address of the robot server")
     argparser.add_argument("local_ip", help="IP address of this PC")
+    argparser.add_argument("max_num", help="Maximum number of recorded poses")
     args = argparser.parse_args()
-
+    
     # Define alias
     log = flexivrdk.Log()
     mode = flexivrdk.Mode
@@ -137,7 +134,7 @@ def main():
                 )
 
                 # Record 500 poses
-                while len(saved_poses) < 150:
+                while len(saved_poses) < int(args.max_num):
                     robot.getRobotStates(robot_states)
                     saved_poses.append(robot_states.tcpPose)
                     log.info("New pose saved: " + str(robot_states.tcpPose))

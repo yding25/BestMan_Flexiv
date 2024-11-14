@@ -20,8 +20,15 @@ from Visualization.camera import Camera
 import numpy as np
 import argparse
 import time
+import pygame
 
-
+def play_mp3(filename):
+    pygame.mixer.init()
+    pygame.mixer.music.load(filename)
+    pygame.mixer.music.play()
+    while pygame.mixer.music.get_busy():
+        pygame.time.Clock().tick(10)
+    
 def main():
     # Parse Arguments
     argparser = argparse.ArgumentParser(description="Move the robot arm to follow a trajectory.")
@@ -39,7 +46,7 @@ def main():
 
     # Instantiate the robot interface
     bestman = Bestman_Real_Flexiv(args.robot_ip, args.local_ip, args.frequency)
-    
+
     try:
         # Clear fault on the robot server if any
         bestman.clear_fault()
@@ -90,8 +97,36 @@ def main():
         # activate gripper
         bestman.connect_gripper()
         time.sleep(1)
-        bestman.close_gripper()
+        bestman.open_gripper()
         time.sleep(1)
+
+        # move to cup, and be ready to grasp it
+        target_trajectory = load_poses_from_xml(filename="recorded_traj/saved_poses4.xml")
+        bestman.move_end_effector_follow_trajectory(target_trajectory, max_linear_vel=0.1, max_angular_vel=0.5)
+        time.sleep(2)
+
+        # close gripper, and grasp the cup
+        bestman.close_gripper()
+        time.sleep(2)
+
+        # move cup to coffee maker
+        target_trajectory = load_poses_from_xml(filename="recorded_traj/saved_poses5.xml")
+        bestman.move_end_effector_follow_trajectory(target_trajectory, max_linear_vel=0.1, max_angular_vel=0.5)
+        time.sleep(2)
+
+        # open gripper, and ungrasp the cup
+        bestman.open_gripper()
+        time.sleep(2)
+
+        # pose for being home 1
+        pose1 = [0.5628906488418579, -0.08013617247343063, 0.4745604693889618, 0.0014537398237735033, -0.039826150983572006, 0.9992029070854187, 0.0023102618288248777]
+        pose1 = pose_to_euler(pose1)
+        bestman.move_end_effector_to_goal_pose(pose1)
+        time.sleep(5)
+
+        # close gripper before pressing button
+        bestman.close_gripper()
+        time.sleep(3)
 
         # move to button, next press on it, and finally leave it
         target_trajectory = load_poses_from_xml(filename="recorded_traj/saved_poses.xml")
@@ -136,6 +171,8 @@ def main():
         _pose_stop = pose_to_euler(pose_stop)
         bestman.move_end_effector_to_goal_pose(_pose_stop)
         time.sleep(5)
+
+        play_mp3("mp3/givecoffee.mp3")
 
     except Exception as e:
         # Log any exceptions that occur

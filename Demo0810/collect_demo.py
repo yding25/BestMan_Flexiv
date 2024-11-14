@@ -1,42 +1,43 @@
 #!/usr/bin/env python
 
-"""intermediate4_teach_by_demonstration.py
-
-This tutorial shows a demo implementation for teach by demonstration: free-drive the robot and
-record a series of Cartesian poses, which are then reproduced by the robot.
-
-Run this script using:
-python intermediate4_teach_by_demonstration.py 192.168.2.100 192.168.2.108
 """
+Run this script using:
+python collect_demo.py 192.168.2.100 192.168.2.108 200
 
-__copyright__ = "Copyright (C) 2016-2021 Flexiv Ltd. All Rights Reserved."
-__author__ = "Flexiv"
+200: maximum number of poses
+"""
 
 import time
 import argparse
 import sys
 import os
+import xml.etree.ElementTree as ET
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(os.path.join(parent_dir, 'RoboticsToolBox'))
-from RoboticsToolBox.utils import quat2eulerZYX
-from RoboticsToolBox.utils import list2str
-from RoboticsToolBox.utils import parse_pt_states
+from RoboticsToolBox.utils import quat2eulerZYX, list2str, parse_pt_states
 from Bestman_flexiv import *
-import flexivrdk
+
 # Maximum contact wrench [fx, fy, fz, mx, my, mz] [N][Nm]
 MAX_CONTACT_WRENCH = [50.0, 50.0, 50.0, 15.0, 15.0, 15.0]
 
-def print_description():
+def save_poses_to_xml(poses, filename="recorded_traj/saved_poses5.xml"):
     """
-    Print tutorial description.
+    Save the recorded poses to an XML file.
 
+    Args:
+        poses (list): List of recorded poses.
+        filename (str): Name of the XML file to save the poses.
     """
-    print(
-        "This tutorial shows a demo implementation for teach by demonstration: free-drive the "
-        "robot and record a series of Cartesian poses, which are then reproduced by the robot."
-    )
-    print()
+    root = ET.Element("Poses")
 
+    for i, pose in enumerate(poses):
+        pose_element = ET.SubElement(root, "Pose", id=str(i+1))
+        ET.SubElement(pose_element, "Position", x=str(pose[0]), y=str(pose[1]), z=str(pose[2]))
+        ET.SubElement(pose_element, "Orientation", qx=str(pose[3]), qy=str(pose[4]), qz=str(pose[5]), qw=str(pose[6]))
+
+    tree = ET.ElementTree(root)
+    tree.write(filename, encoding="utf-8", xml_declaration=True)
+    print(f"Saved poses to {filename}")
 
 def main():
     # Program Setup
@@ -45,15 +46,12 @@ def main():
     argparser = argparse.ArgumentParser()
     argparser.add_argument("robot_ip", help="IP address of the robot server")
     argparser.add_argument("local_ip", help="IP address of this PC")
+    argparser.add_argument("max_num", help="Maximum number of recorded poses")
     args = argparser.parse_args()
-
+    
     # Define alias
     log = flexivrdk.Log()
     mode = flexivrdk.Mode
-
-    # Print description
-    log.info("Tutorial description:")
-    print_description()
 
     try:
         # RDK Initialization
@@ -93,7 +91,7 @@ def main():
 
         # Acceptable user inputs
         log.info("Accepted key inputs:")
-        print("[n] - start new teaching process")
+        print("[n] - start new teaching process, please double check the xml filename!")
         print("[r] - record current robot pose")
         print("[e] - finish recording and start execution")
 
@@ -116,6 +114,18 @@ def main():
                 log.warn(
                     "Hold down the enabling button on the motion bar to activate free drive"
                 )
+
+                # Record 500 poses
+                while len(saved_poses) < int(args.max_num):
+                    robot.getRobotStates(robot_states)
+                    saved_poses.append(robot_states.tcpPose)
+                    log.info("New pose saved: " + str(robot_states.tcpPose))
+                    log.info("Number of saved poses: " + str(len(saved_poses)))
+                    time.sleep(0.05)  # Delay to ensure system is not overwhelmed
+
+                # Save poses to XML
+                save_poses_to_xml(saved_poses)
+
             # Save current robot pose
             elif input_buffer == "r":
                 if not robot.isBusy():
@@ -126,6 +136,7 @@ def main():
                 saved_poses.append(robot_states.tcpPose)
                 log.info("New pose saved: " + str(robot_states.tcpPose))
                 log.info("Number of saved poses: " + str(len(saved_poses)))
+
             # Reproduce recorded poses
             elif input_buffer == "e":
                 if len(saved_poses) == 0:
@@ -187,6 +198,6 @@ def main():
         # Print exception error message
         log.error(str(e))
 
-
 if __name__ == "__main__":
     main()
+

@@ -15,7 +15,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 flexiv_rdk_path = os.path.join(current_dir, "../Install/flexiv_rdk/lib_py")
 sys.path.insert(0, flexiv_rdk_path)
 import flexivrdk
-
+from utils import parse_pt_states
 
 class Bestman_Real_Flexiv:
     def __init__(self, robot_ip, local_ip, frequency):

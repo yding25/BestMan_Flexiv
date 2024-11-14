@@ -4,6 +4,7 @@ import pyrealsense2 as rs
 from typing import Type, Tuple, Dict
 from dataclasses import dataclass
 from PIL import Image
+import time
 
 class Camera:
     def __init__(self, device_id: str, width: int = 640, height: int = 480, fps: int = 30):
@@ -12,14 +13,21 @@ class Camera:
         self.height = height
         self.fps = fps
 
+        # check RealSense status
+        if not self.check_realsense_connection():
+            raise RuntimeError("No RealSense device connected.")
+        
         # Configure RealSense pipeline
         self.pipeline = rs.pipeline()
         self.config = rs.config()
         self.config.enable_device(self.device_id)
         self.config.enable_stream(rs.stream.color, self.width, self.height, rs.format.bgr8, self.fps)
+        self.config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
+        self.config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
 
         # Start streaming
         self.profile = self.pipeline.start(self.config)
+        time.sleep(2)  # 等待摄像头稳定连接
         
         # Get the stream profile and camera intrinsics
         stream = self.profile.get_stream(rs.stream.color)
@@ -39,6 +47,16 @@ class Camera:
         self.aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_250)
         self.parameters = cv2.aruco.DetectorParameters()
 
+    # check realsense status
+    def check_realsense_connection(self) -> bool:
+        context = rs.context()
+        if len(context.devices) == 0:
+            print("No RealSense devices connected.")
+            return False
+        else:
+            print("RealSense device detected.")
+            return True
+            
     def update(self):
         frames = self.pipeline.wait_for_frames()
         color_frame = frames.get_color_frame()
@@ -99,3 +117,46 @@ class Camera:
             self.pipeline.stop()
             if debug:
                 cv2.destroyAllWindows()
+
+
+    def display(self, option="rgb"):
+        try:
+            while True:
+                try:
+                    # 设置帧获取超时时间为5000毫秒（5秒）
+                    frames = self.pipeline.wait_for_frames(5000)
+
+                    # 根据 option 选择性获取帧
+                    color_frame = frames.get_color_frame() if option in ["rgb", "rgbd"] else None
+                    depth_frame = frames.get_depth_frame() if option in ["d", "rgbd"] else None
+
+                    # 检查帧是否成功获取
+                    if option in ["rgb", "rgbd"] and not color_frame:
+                        print("RGB frame not received. Retrying...")
+                        continue
+                    if option in ["d", "rgbd"] and not depth_frame:
+                        print("Depth frame not received. Retrying...")
+                        continue
+
+                    # 显示 RGB 图像
+                    if color_frame:
+                        color_image = np.asanyarray(color_frame.get_data())
+                        cv2.imshow('RGB Frame', color_image)
+
+                    # 显示深度图像
+                    if depth_frame:
+                        depth_image = np.asanyarray(depth_frame.get_data())
+                        depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
+                        cv2.imshow('Depth Frame', depth_colormap)
+
+                    # Press 'q' to exit
+                    if cv2.waitKey(1) & 0xFF == ord('q'):
+                        break
+
+                except RuntimeError as e:
+                    print(f"Error receiving frame: {e}")
+                    continue
+        finally:
+            # Stop streaming and close windows
+            self.pipeline.stop()
+            cv2.destroyAllWindows()
