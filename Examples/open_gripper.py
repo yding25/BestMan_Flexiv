@@ -6,12 +6,12 @@
 # @Author         : Yan
 # @Email          : yding25@binghamton.edu
 # @Description    : Open robotiq gripper
-# @Usage          : python /home/$(whoami)/BestMan_Flexiv/Examples/open_gripper.py 192.168.2.100 192.168.2.108 20
+# @Usage          : python open_gripper.py 192.168.2.100 192.168.2.108 20
 """
 
 import argparse
 import time
-from RoboticsToolBox import Bestman_Real_Flexiv
+from Robotics_API import Bestman_Real_Flexiv
 import flexivrdk
 
 
@@ -25,12 +25,6 @@ def main():
     argparser.add_argument("local_ip", help="IP address of this PC")
     argparser.add_argument(
         "frequency", help="command frequency, 1 to 200 [Hz]", type=int
-    )
-    # Optional arguments
-    argparser.add_argument(
-        "--hold",
-        action="store_true",
-        help="robot holds current joint positions, otherwise do a sine-sweep",
     )
     args = argparser.parse_args()
 

@@ -14,8 +14,8 @@ print('=' * 10 + "System Path" + '=' * 10)
 for i, path in enumerate(sys.path):
     print(f"{i + 1}. {path}")
 print('=' * 30)
-from RoboticsToolBox.Bestman_flexiv import Bestman_Real_Flexiv
-from RoboticsToolBox.utils import pose_to_euler, load_poses_from_xml
+from Robotics_API.Bestman_flexiv import Bestman_Real_Flexiv
+from Robotics_API.Utils import pose_to_euler, load_poses_from_xml
 from Visualization.camera import Camera
 import numpy as np
 import argparse

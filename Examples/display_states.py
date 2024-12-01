@@ -6,13 +6,19 @@
 # @Author         : Yan
 # @Email          : yding25@binghamton.edu
 # @Description    : Display arm state
-# @Usage          : python /home/$(whoami)/BestMan_Flexiv/Examples/display_states.py 192.168.2.100 192.168.2.108
+# @Usage          : python display_states.py 192.168.2.100 192.168.2.108
 """
 
 import argparse
 import rospy
-from RoboticsToolBox import Bestman_Real_Flexiv
+from Robotics_API import Bestman_Real_Flexiv
 
+def print_test():
+    """
+    Function to run the 'test' printing task in a separate thread.
+    """
+    for _ in range(1000000):
+        print("test")
 
 def print_robot_states(robot_states):
     """

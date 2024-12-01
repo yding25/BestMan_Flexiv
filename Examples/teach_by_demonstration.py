@@ -1,192 +1,122 @@
 #!/usr/bin/env python
-
-"""intermediate4_teach_by_demonstration.py
-
-This tutorial shows a demo implementation for teach by demonstration: free-drive the robot and
-record a series of Cartesian poses, which are then reproduced by the robot.
-
-Run this script using:
-python intermediate4_teach_by_demonstration.py 192.168.2.100 192.168.2.108
+# -*- coding: utf-8 -*-
 """
-
-__copyright__ = "Copyright (C) 2016-2021 Flexiv Ltd. All Rights Reserved."
-__author__ = "Flexiv"
+@FileName       : teach_by_demonstration.py
+@Time           : 2024-12-02 00:30:18
+@Author         : Yan
+@Email          : yding25@binghamton.edu
+@Description    : Demonstration-based robot teaching script.
+@Usage          : python move_eef_to_pose.py/teach_by_demonstration.py 192.168.2.100 192.168.2.108 20
+"""
 
 import time
 import argparse
-import sys
-import os
-parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-sys.path.append(os.path.join(parent_dir, 'RoboticsToolBox'))
-from RoboticsToolBox.utils import quat2eulerZYX
-from RoboticsToolBox.utils import list2str
-from RoboticsToolBox.utils import parse_pt_states
-from Bestman_flexiv import *
+from Robotics_API import Bestman_Real_Flexiv
+from Robotics_API.Utils import *
 import flexivrdk
-# Maximum contact wrench [fx, fy, fz, mx, my, mz] [N][Nm]
+import rospy
+
+# Maximum allowable contact wrench in Cartesian space [fx, fy, fz, mx, my, mz] [N][Nm]
 MAX_CONTACT_WRENCH = [50.0, 50.0, 50.0, 15.0, 15.0, 15.0]
 
-def print_description():
-    """
-    Print tutorial description.
-
-    """
-    print(
-        "This tutorial shows a demo implementation for teach by demonstration: free-drive the "
-        "robot and record a series of Cartesian poses, which are then reproduced by the robot."
-    )
-    print()
-
-
 def main():
-    # Program Setup
-    # ==============================================================================================
-    # Parse arguments
-    argparser = argparse.ArgumentParser()
-    argparser.add_argument("robot_ip", help="IP address of the robot server")
-    argparser.add_argument("local_ip", help="IP address of this PC")
-    args = argparser.parse_args()
+    """
+    Main function for demonstration-based robot teaching.
+    """
+    # Parse command-line arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument("robot_ip", help="IP address of the robot server")
+    parser.add_argument("local_ip", help="IP address of this PC")
+    parser.add_argument("frequency", help="Command frequency (1-200 Hz)", type=int)
+    args = parser.parse_args()
 
-    # Define alias
+    # Define aliases for flexivrdk modules
     log = flexivrdk.Log()
     mode = flexivrdk.Mode
 
-    # Print description
+    # Print tutorial description
     log.info("Tutorial description:")
     print_description()
 
     try:
-        # RDK Initialization
-        # ==========================================================================================
-        # Instantiate robot interface
-        robot = flexivrdk.Robot(args.robot_ip, args.local_ip)
+        # Initialize ROS node
+        rospy.init_node("robot_states_display", anonymous=True)
 
-        # Clear fault on robot server if any
-        if robot.isFault():
-            log.warn("Fault occurred on robot server, trying to clear ...")
-            # Try to clear the fault
-            robot.clearFault()
-            time.sleep(2)
-            # Check again
-            if robot.isFault():
-                log.error("Fault cannot be cleared, exiting ...")
-                return
-            log.info("Fault on robot server is cleared")
+        # Create a robot interface
+        bestman = Bestman_Real_Flexiv(args.robot_ip, args.local_ip, args.frequency)
+        
+        # Initialize the robot
+        if not bestman.initialize_robot():
+            return  # Exit if initialization fails
 
-        # Enable the robot, make sure the E-stop is released before enabling
-        log.info("Enabling robot ...")
-        robot.enable()
-
-        # Wait for the robot to become operational
-        while not robot.isOperational():
-            time.sleep(1)
-
-        log.info("Robot is now operational")
-
-        # Teach By Demonstration
-        # ==========================================================================================
-        # Recorded robot poses
-        saved_poses = []
-
-        # Robot states data
+        # Teaching by demonstration variables
+        recorded_poses = []
         robot_states = flexivrdk.RobotStates()
 
-        # Acceptable user inputs
+        # User input guide
         log.info("Accepted key inputs:")
-        print("[n] - start new teaching process")
-        print("[r] - record current robot pose")
-        print("[e] - finish recording and start execution")
+        print("[n] - Start a new teaching process")
+        print("[r] - Record the current robot pose")
+        print("[e] - Execute the recorded poses")
+        print("[q] - Quit")
 
-        # User input polling
-        input_buffer = ""
         while True:
-            input_buffer = str(input())
-            # Start new teaching process
-            if input_buffer == "n":
-                # Clear storage
-                saved_poses.clear()
+            try:
+                user_input = input("Enter command ('n', 'r', 'e', 'q'): ").strip()
 
-                # Put robot to plan execution mode
-                robot.setMode(mode.NRT_PLAN_EXECUTION)
-
-                # Robot run free drive
-                robot.executePlan("PLAN-FreeDriveAuto")
-
-                log.info("New teaching process started")
-                log.warn(
-                    "Hold down the enabling button on the motion bar to activate free drive"
-                )
-            # Save current robot pose
-            elif input_buffer == "r":
-                if not robot.isBusy():
-                    log.warn("Please start a new teaching process first")
-                    continue
-
-                robot.getRobotStates(robot_states)
-                saved_poses.append(robot_states.tcpPose)
-                log.info("New pose saved: " + str(robot_states.tcpPose))
-                log.info("Number of saved poses: " + str(len(saved_poses)))
-            # Reproduce recorded poses
-            elif input_buffer == "e":
-                if len(saved_poses) == 0:
-                    log.warn("No pose is saved yet")
-                    continue
-
-                # Put robot to primitive execution mode
-                robot.setMode(mode.NRT_PRIMITIVE_EXECUTION)
-
-                for i in range(len(saved_poses)):
-                    log.info(
-                        "Executing pose " + str(i + 1) + "/" + str(len(saved_poses))
-                    )
-
-                    target_pos = [
-                        saved_poses[i][0],
-                        saved_poses[i][1],
-                        saved_poses[i][2],
-                    ]
-                    # Convert quaternion to Euler ZYX required by MoveCompliance primitive
-                    target_quat = [
-                        saved_poses[i][3],
-                        saved_poses[i][4],
-                        saved_poses[i][5],
-                        saved_poses[i][6],
-                    ]
-
-                    target_euler_deg = quat2eulerZYX(target_quat, degree=True)
-                    robot.executePrimitive(
-                        "MoveCompliance(target="
-                        + list2str(target_pos)
-                        + list2str(target_euler_deg)
-                        + "WORLD WORLD_ORIGIN, maxVel=0.3, enableMaxContactWrench=1, maxContactWrench="
-                        + list2str(MAX_CONTACT_WRENCH)
-                        + ")"
-                    )
-
-                    # Wait for robot to reach target location by checking for "reachedTarget = 1"
-                    # in the list of current primitive states
-                    while (
-                        parse_pt_states(robot.getPrimitiveStates(), "reachedTarget")
-                        != "1"
-                    ):
-                        time.sleep(1)
-
-                log.info(
-                    "All saved poses are executed, enter 'n' to start a new "
-                    "teaching process, 'r' to record more poses, 'e' to repeat "
-                    "execution"
-                )
-
-                # Put robot back to free drive
-                robot.setMode(mode.NRT_PLAN_EXECUTION)
-                robot.executePlan("PLAN-FreeDriveAuto")
-            else:
-                log.warn("Invalid input")
+                if user_input == "n":
+                    recorded_poses.clear()
+                    bestman.robot.setMode(mode.NRT_PLAN_EXECUTION)
+                    bestman.robot.executePlan("PLAN-FreeDriveAuto")
+                    log.info("Started a new teaching process. Activate free-drive mode.")
+                elif user_input == "r":
+                    if not bestman.robot.isBusy():
+                        log.warn("Please start a new teaching process first.")
+                        continue
+                    bestman.robot.getRobotStates(robot_states)
+                    recorded_poses.append(robot_states.tcpPose)
+                    log.info(f"Recorded pose: {robot_states.tcpPose}")
+                    log.info(f"Total poses recorded: {len(recorded_poses)}")
+                elif user_input == "e":
+                    if not recorded_poses:
+                        log.warn("No poses have been recorded yet.")
+                        continue
+                    bestman.robot.setMode(mode.NRT_PRIMITIVE_EXECUTION)
+                    for idx, pose in enumerate(recorded_poses):
+                        log.info(f"Executing pose {idx + 1}/{len(recorded_poses)}")
+                        position = pose[:3]
+                        quaternion = pose[3:]
+                        euler_angles = quat2eulerZYX(quaternion, degree=True)
+                        command = (
+                            f"MoveCompliance(target={list2str(position)}"
+                            f"{list2str(euler_angles)}WORLD WORLD_ORIGIN, "
+                            f"maxVel=0.3, enableMaxContactWrench=1, "
+                            f"maxContactWrench={list2str(MAX_CONTACT_WRENCH)})"
+                        )
+                        bestman.robot.executePrimitive(command)
+                        start_time = time.time()
+                        timeout = 30
+                        while parse_primitive_state(bestman.robot.getPrimitiveStates(), "reachedTarget") != "1":
+                            if time.time() - start_time > timeout:
+                                log.error("Timeout while waiting for the robot to reach the target.")
+                                break
+                            time.sleep(1)
+                    log.info("All poses executed. Use 'n', 'r', or 'e' for further actions.")
+                    bestman.robot.setMode(mode.NRT_PLAN_EXECUTION)
+                    bestman.robot.executePlan("PLAN-FreeDriveAuto")
+                elif user_input == "q":
+                    log.info("Exiting the program.")
+                    break
+                else:
+                    log.warn("Invalid input. Please use 'n', 'r', 'e', or 'q'.")
+            except KeyboardInterrupt:
+                log.info("Program interrupted by user. Exiting...")
+                break
+            except Exception as e:
+                log.error(f"Error: {e}")
 
     except Exception as e:
-        # Print exception error message
-        log.error(str(e))
-
+        log.error(f"Error: {e}")
 
 if __name__ == "__main__":
     main()
