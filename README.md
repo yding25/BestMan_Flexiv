@@ -33,7 +33,7 @@ doxygen Doxyfile
 firefox /home/$(whoami)/BestMan_Flexiv/docs/html/index.html
 ```
 
-## 👨‍💻 Basic Demos
+## 👨‍💻 Basic Examples
 :shamrock: **Test Robotiq Gripper**
 
 ```
