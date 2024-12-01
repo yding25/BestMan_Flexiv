@@ -16,7 +16,7 @@ for i, path in enumerate(sys.path):
 print('=' * 30)
 from RoboticsToolBox.Bestman_flexiv import Bestman_Real_Flexiv
 from RoboticsToolBox.utils import pose_to_euler, load_poses_from_xml
-from Visualization.camera import Camera
+from camera import Camera
 import numpy as np
 import argparse
 import time

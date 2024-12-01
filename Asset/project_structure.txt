@@ -12,7 +12,7 @@ BestMan_Flexiv/
 ├── Examples
 │   └── api_test.py
 ├── Install
-│   ├── basic_environment.yaml
+│   ├── basic_env_py38.yaml
 │   └── flexiv_rdk.zip
 ├── LICENSE.txt
 ├── README.md

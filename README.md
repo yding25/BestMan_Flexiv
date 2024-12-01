@@ -11,9 +11,9 @@
 
 Welcome to the BestMan_Flexiv repository, a codebase dedicated to the Flexiv robotic arm.
 
-## 💻 Installation
+## 💻 Installation (Basic Env)
 
-- Clone the Repository
+- Pull the repository
 
 ```
 cd /home/$(whoami)
@@ -23,11 +23,40 @@ git clone https://github.com/yding25/BestMan_Flexiv.git
 <!-- - Integrate with flexiv_rdk 
 Ensure you have flexiv_rdk version 0.10. You can download it from [Flexiv Robotics GitHub](https://github.com/flexivrobotics/flexiv_rdk.git) or the [Flexiv RDK](https://rdk.flexiv.com/manual/getting_started.html#setup-and-run-python-rdk) Manual. -->
 
-- Create conda environment
+- Run the following script to add the project to the PYTHON search path
 
 ```
+/home/$(whoami)/BestMan_Flexiv/Install
+chmod 777 pythonpath.sh
+bash pythonpath.sh
+source ~/.bashrc
+```
+- For Flexiv, add the flexivrdk to the PYTHON search path
+
+```
+chmod 777 load_flexivrdk.sh
+bash load_flexivrdk.sh
+source ~/.bashrc
+```
+
+- Create basic conda environment
+```
 cd /home/$(whoami)/BestMan_Flexiv/Install
-conda env create -f basic_environment.yaml
+conda env create -f basic_env_py38.yaml
+```
+
+- Install ROS environment
+```
+cd /home/$(whoami)/BestMan_Flexiv/Install
+chmod 777 install_ros_noetic.sh
+bash install_ros_noetic.sh
+source ~/.bashrc
+```
+
+- Check ROS environment
+```
+roscore
+echo $ROS_DISTRO
 ```
 
 ## 🔎 Project Structure
@@ -38,7 +67,7 @@ firefox /home/$(whoami)/BestMan_Flexiv/docs/html/index.html
 ```
 
 ## 👨‍💻 Basic Demos
-:shamrock: **Load Kitchens**
+:shamrock: **Test Robotiq Gripper**
 
 ```
 python /home/$(whoami)/BestMan_Flexiv/Examples/open_gripper.py 192.168.2.100 192.168.2.108 20
@@ -54,3 +83,8 @@ If you have any questions or need further assistance, please feel free to reach 
 ##  :handshake: Reference
 - [IKPy’s documentation](https://ikpy.readthedocs.io/en/latest/index.html)
 - [Flexiv RDK APIs](https://rdk.flexiv.cn/api/index.html)
+
+
+export PYTHONPATH=:/home/yan/BestMan_Pybullet:/home/yan/BestMan_Flexiv
+export PYTHONPATH="$PYTHONPATH:/home/yan/BestMan_Pybullet"
+export PYTHONPATH="$PYTHONPATH:/home/yan/BestMan_Flexiv"

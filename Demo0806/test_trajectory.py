@@ -16,7 +16,7 @@ for i, path in enumerate(sys.path):
 print('=' * 30)
 from RoboticsToolBox.Bestman_flexiv import Bestman_Real_Flexiv
 from RoboticsToolBox.utils import pose_to_euler, load_poses_from_xml
-from Visualization.camera import Camera
+from camera import Camera
 import numpy as np
 import argparse
 import time
@@ -65,10 +65,15 @@ def main():
         time.sleep(3)
 
         # move to button, next press on it, and finally leave it
-        target_trajectory = load_poses_from_xml(filename="recorded_traj/saved_poses4.xml")
+        target_trajectory = load_poses_from_xml(filename="recorded_traj/saved_poses3.xml")
         bestman.move_end_effector_follow_trajectory(target_trajectory, max_linear_vel=0.1, max_angular_vel=0.5)
         time.sleep(3)
-
+        
+        # pose for being home 1
+        pose1 = [0.5628906488418579, -0.08013617247343063, 0.4745604693889618, 0.0014537398237735033, -0.039826150983572006, 0.9992029070854187, 0.0023102618288248777]
+        pose1 = pose_to_euler(pose1)
+        bestman.move_end_effector_to_goal_pose(pose1)
+        time.sleep(5)
     except Exception as e:
         # Log any exceptions that occur
         bestman.log.error(str(e))

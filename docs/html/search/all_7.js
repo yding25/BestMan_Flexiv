@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['list2str_20',['list2str',['../namespaceutility.html#a5471cf39fa6860d796d1c5d6f7108534',1,'utility']]],
-  ['log_5fcommand_21',['log_command',['../classBestman__sim__flexiv_1_1Bestman__Real__Flexiv.html#ab8ca096bcbb017c0bb1e1affea6f38ca',1,'Bestman_sim_flexiv::Bestman_Real_Flexiv']]]
+  ['list2str_23',['list2str',['../namespaceutils.html#a135ab51648af7c3565c3d6999efe7a75',1,'utils']]],
+  ['load_5fposes_5ffrom_5fxml_24',['load_poses_from_xml',['../namespaceutils.html#ade7857afb8de196097225622c121fa58',1,'utils']]],
+  ['log_5fcommand_25',['log_command',['../classBestman__flexiv_1_1Bestman__Real__Flexiv.html#a747b9118e2724435e55ce13eeb3ec9fa',1,'Bestman_flexiv::Bestman_Real_Flexiv']]]
 ];
