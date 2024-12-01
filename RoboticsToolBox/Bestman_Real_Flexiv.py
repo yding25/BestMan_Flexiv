@@ -214,7 +214,7 @@ class Bestman_Real_Flexiv:
         """
         return self.robot_chain.links[7].name
 
-    def get_current_joint_angles(self):
+    def get_current_joint_values(self):
         """
         Retrieves the current joint angles of the robot arm.
 
@@ -222,8 +222,8 @@ class Bestman_Real_Flexiv:
             list: A list of the current joint angles of the robot arm.
         """
         self.update_robot_states()
-        joint_angles = self.robot_states.q
-        return joint_angles
+        joint_values = self.robot_states.q
+        return joint_values
 
     def get_current_eef_pose(self):
         """
@@ -238,14 +238,14 @@ class Bestman_Real_Flexiv:
         orientation = tcp_pose[3:]  # [qw, qx, qy, qz]
         return Pose(position, orientation)
 
-    def move_arm_to_joint_angles(
-        self, joint_angles, target_vel=None, target_acc=None, MAX_VEL=None, MAX_ACC=None
+    def move_arm_to_joint_values(
+        self, joint_values, target_vel=None, target_acc=None, MAX_VEL=None, MAX_ACC=None
     ):
         """
         Move arm to a specific set of joint angles, considering physics.
 
         Args:
-            joint_angles: A list of desired joint angles (in radians) for each joint of the arm.
+            joint_values: A list of desired joint angles (in radians) for each joint of the arm.
             target_vel: Optional. A list of target velocities for each joint.
             target_acc: Optional. A list of target accelerations for each joint.
             MAX_VEL: Optional. A list of maximum velocities for each joint.
@@ -265,10 +265,10 @@ class Bestman_Real_Flexiv:
             MAX_ACC = [0.5] * DOF
 
         self.robot.sendJointPosition(
-            joint_angles, target_vel, target_acc, MAX_VEL, MAX_ACC
+            joint_values, target_vel, target_acc, MAX_VEL, MAX_ACC
         )
 
-    def move_arm_follow_joint_angles(
+    def move_arm_follow_joint_values(
         self,
         target_trajectory,
         target_vel=None,
@@ -447,10 +447,10 @@ class Bestman_Real_Flexiv:
         Args:
             angle (float): The desired rotation angle in radians.
         """
-        current_joint_angles = self.get_current_joint_angles()
+        current_joint_values = self.get_current_joint_values()
 
-        target_joint_angles = current_joint_angles.copy()
-        target_joint_angles[6] += angle
+        target_joint_values = current_joint_values.copy()
+        target_joint_values[6] += angle
         DOF = len(self.robot_states.q)
         target_vel = [0.0] * DOF
         target_acc = [0.0] * DOF
@@ -459,37 +459,37 @@ class Bestman_Real_Flexiv:
 
         self.robot.setMode(self.mode.NRT_JOINT_POSITION)
         self.robot.sendJointPosition(
-            target_joint_angles, target_vel, target_acc, MAX_VEL, MAX_ACC
+            target_joint_values, target_vel, target_acc, MAX_VEL, MAX_ACC
         )
 
     # ----------------------------------------------------------------
     # Functions for IK
     # ----------------------------------------------------------------
 
-    def joints_to_cartesian(self, joint_angles):
+    def joints_to_cartesian(self, joint_values):
         """
         Transforms the robot arm's joint angles to its Cartesian coordinates.
 
         Args:
-            joint_angles (list): A list of joint angles for the robot arm.
+            joint_values (list): A list of joint angles for the robot arm.
 
         Returns:
             Pose: A Pose object representing the Cartesian position and quaternion orientation.
         """
-        if len(joint_angles) != len(self.active_joints):
+        if len(joint_values) != len(self.active_joints):
             raise ValueError(
                 "The number of joint values does not match the number of active joints"
             )
 
-        full_joint_angles = np.zeros(len(self.robot_chain.links))
+        full_joint_values = np.zeros(len(self.robot_chain.links))
         active_joint_indices = [
             self.robot_chain.links.index(joint) for joint in self.active_joints
         ]
 
-        for i, joint_value in enumerate(joint_angles):
-            full_joint_angles[active_joint_indices[i]] = joint_value
+        for i, joint_value in enumerate(joint_values):
+            full_joint_values[active_joint_indices[i]] = joint_value
 
-        cartesian_matrix = self.robot_chain.forward_kinematics(full_joint_angles)
+        cartesian_matrix = self.robot_chain.forward_kinematics(full_joint_values)
         position = cartesian_matrix[:3, 3]
         orientation_matrix = cartesian_matrix[:3, :3]
         quaternion = R.from_matrix(orientation_matrix).as_quat()
@@ -513,16 +513,16 @@ class Bestman_Real_Flexiv:
         target_pose[:3, :3] = rotation_matrix
         target_pose[:3, 3] = position
 
-        initial_joint_angles = [0] * len(self.robot_chain)
+        initial_joint_values = [0] * len(self.robot_chain)
 
-        joint_angles = ikpy.inverse_kinematics.inverse_kinematic_optimization(
+        joint_values = ikpy.inverse_kinematics.inverse_kinematic_optimization(
             chain=self.robot_chain,
             target_frame=target_pose,
-            starting_nodes_angles=initial_joint_angles,
+            starting_nodes_angles=initial_joint_values,
             orientation_mode="all",
         )
 
-        return joint_angles[1:8]
+        return joint_values[1:8]
 
     def calculate_IK_error(self, goal_position, goal_orientation):
         """
