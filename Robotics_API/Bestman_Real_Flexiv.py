@@ -346,7 +346,7 @@ class Bestman_Real_Flexiv:
             DOF = len(self.robot_states.q)
 
             # Get limits from RobotInfo
-            alpha = 0.5  # Key coefficient to regulate the maximum speed, with a range of [0.0001, 1]
+            alpha = 0.1  # Key coefficient to regulate the maximum speed, with a range of [0.0001, 1]
             robot_info = self.robot.info()
             default_max_vel = [vel * alpha for vel in robot_info.dqMax]
             default_max_acc = [
@@ -379,7 +379,7 @@ class Bestman_Real_Flexiv:
     # End Effector (EEF) Functions
     # ----------------------------------------------------------------
 
-    def move_eef_to_goal_pose(self, goal_pose, max_linear_vel=2, max_angular_vel=1):
+    def move_eef_to_goal_pose(self, goal_pose, max_linear_vel=1, max_angular_vel=1):
         """
         Moves the end effector to the specified pose.
 

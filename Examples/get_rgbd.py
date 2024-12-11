@@ -12,7 +12,6 @@
 import argparse
 import rospy
 from Robotics_API import Bestman_Real_Flexiv, Pose
-from Robotics_API.Utils import pose_to_euler
 from Sensor import Camera
 
 
