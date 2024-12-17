@@ -57,19 +57,12 @@ def main():
             [0.8, -0.7, 0, 1.3, 0, 0.5, 0.2]
         ]
 
-        # target_trajectory = [
-        #     [0.4, -0.5, 0, 1.3, 0, 0.5, 0.2],
-        #     [0.8, -0.7, 0, 1.3, 0, 0.5, 0.2],
-        #     [0.4, -0.5, 0, 1.3, 0, 0.5, 0.2],
-        #     [0.2, -0.5, 0, 1.3, 0, 0.5, 0.2]
-        # ]
-
         # Move the arm to follow the target trajectory
         for i in range(len(target_trajectory)):
             bestman.move_arm_to_joint_values(target_trajectory[i])
 
             # Wait for motion completion (This method will block the main threa)
-            if bestman.wait_for_motion_completion_joints(target_trajectory[i]):
+            if bestman.wait_for_joints(target_trajectory[i]):
                 rospy.loginfo("Robot motion completed successfully.")
             else:
                 rospy.logwarn("Robot motion did not complete within the timeout.")

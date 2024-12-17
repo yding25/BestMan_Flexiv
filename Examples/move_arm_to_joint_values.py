@@ -57,7 +57,7 @@ def main():
         bestman.move_arm_to_joint_values(target_joint)
         
         # Wait for motion completion (This method will block the main threa)
-        if bestman.wait_for_motion_completion_joints(target_joint, error_threshold=0.01, speed_threshold=0.01, timeout=10):
+        if bestman.wait_for_joints(target_joint, error_threshold=0.01, speed_threshold=0.01, timeout=10):
             rospy.loginfo("Robot motion completed successfully.")
         else:
             rospy.logwarn("Robot motion did not complete within the timeout.")

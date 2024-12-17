@@ -6,7 +6,7 @@
 # @Author         : Yan
 # @Email          : yding25@binghamton.edu
 # @Description    : Display arm state
-# @Usage          : python display_states.py 192.168.2.100 192.168.2.108
+# @Usage          : python display_states.py 192.168.2.100 192.168.2.108 10
 """
 
 import argparse

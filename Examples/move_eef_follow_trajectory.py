@@ -82,12 +82,12 @@ def main():
             bestman.move_eef_to_goal_pose(target_trajectory[i])
 
             # # Wait for motion completion (This method will block the main threa)
-            # if bestman.wait_for_motion_completion_eef(target_trajectory[i]):
-            #     rospy.loginfo("Robot motion completed successfully.")
-            # else:
-            #     rospy.logwarn("Robot motion did not complete within the timeout.")
+            if bestman.wait_for_eef(target_trajectory[i]):
+                rospy.loginfo("Robot motion completed successfully.")
+            else:
+                rospy.logwarn("Robot motion did not complete within the timeout.")
             
-            time.sleep(0.1)
+            # time.sleep(1)
 
     except Exception as e:
         # Log any exceptions that occur

@@ -53,7 +53,7 @@ def main():
         bestman.move_eef_to_goal_pose(target_pose)
         
         # Wait for motion completion (This method will block the main threa)
-        bestman.wait_for_motion_completion_eef(target_pose)
+        bestman.wait_for_eef(target_pose)
 
     except Exception as e:
         # Log any exceptions that occur

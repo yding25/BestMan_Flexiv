@@ -9,13 +9,6 @@
 # @Usage          : python move_arm_to_home.py 192.168.2.100 192.168.2.108 20
 """
 
-
-"""
-Run this script using:
-
-python move_arm_to_home.py 192.168.2.100 192.168.2.108 20
-"""
-
 import argparse
 import time
 from Robotics_API import Bestman_Real_Flexiv

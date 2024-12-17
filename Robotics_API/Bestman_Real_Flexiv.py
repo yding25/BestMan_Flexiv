@@ -379,7 +379,7 @@ class Bestman_Real_Flexiv:
     # End Effector (EEF) Functions
     # ----------------------------------------------------------------
 
-    def move_eef_to_goal_pose(self, goal_pose, max_linear_vel=1, max_angular_vel=1):
+    def move_eef_to_goal_pose(self, goal_pose, max_linear_vel=0.1, max_angular_vel=0.5):
         """
         Moves the end effector to the specified pose.
 
@@ -412,8 +412,8 @@ class Bestman_Real_Flexiv:
         self,
         goal_pose,
         wrench,
-        max_linear_vel=0.5,
-        max_angular_vel=1.0,
+        max_linear_vel=0.1,
+        max_angular_vel=0.5,
         contact_wrench=None,
     ):
         """
@@ -422,15 +422,13 @@ class Bestman_Real_Flexiv:
         Args:
             goal_pose (Pose): Desired pose of the end effector (position and quaternion orientation).
             wrench (list[float]): Target TCP wrench [fx, fy, fz, mx, my, mz] in the force control reference frame.
-            max_linear_vel (float): Maximum linear velocity. Defaults to 0.5 m/s.
-            max_angular_vel (float): Maximum angular velocity. Defaults to 1.0 rad/s.
+            max_linear_vel (float): Maximum linear velocity. Defaults to 0.1 m/s.
+            max_angular_vel (float): Maximum angular velocity. Defaults to 0.5 rad/s.
             contact_wrench (list[float], optional): Maximum contact wrench for collision detection.
 
         Returns:
             None
         """
-
-        # TODO
         try:
             if not isinstance(goal_pose, Pose):
                 raise TypeError("goal_pose must be an instance of Pose")
@@ -793,7 +791,7 @@ class Bestman_Real_Flexiv:
 
     #     return motion_complete["status"]
 
-    def wait_for_motion_completion_joints(
+    def wait_for_joints(
         self,
         target_joint_values,
         error_threshold=0.01,
@@ -833,7 +831,7 @@ class Bestman_Real_Flexiv:
         rospy.logerr("Timeout reached.")
         return False  # Timeout occurred
 
-    def wait_for_motion_completion_eef(
+    def wait_for_eef(
         self,
         target_tcp_pose,
         position_error_threshold=0.03,
@@ -873,7 +871,9 @@ class Bestman_Real_Flexiv:
             )
 
             # Check if position errors are within threshold and velocities are below threshold
-            if position_error <= position_error_threshold: # and np.linalg.norm(current_tcp_velocity[:3]) <= velocity_threshold
+            if (
+                position_error <= position_error_threshold
+            ):  # and np.linalg.norm(current_tcp_velocity[:3]) <= velocity_threshold
                 rospy.loginfo("Motion completed successfully.")
                 return True  # Exit on success
 
