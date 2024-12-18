@@ -22,6 +22,7 @@ import serial
 import minimalmodbus as mm
 import pyRobotiqGripper
 import flexivrdk
+import logging
 import rospy
 
 
@@ -38,10 +39,10 @@ class Bestman_Real_Flexiv:
         robot_states: A container for storing the current state of the robot.
         robot_chain: A kinematic chain for the robot, parsed from the URDF file.
         active_joints: A list of active (revolute or prismatic) joints in the robot.
-        log_file: The file path for logging robot commands.
     """
 
     def __init__(self, robot_ip, local_ip, frequency):
+        # DONE
         """
         Initializes the Flexiv robot and related components.
 
@@ -63,36 +64,30 @@ class Bestman_Real_Flexiv:
         urdf_file = os.path.join(current_dir, "../Asset/flexiv_rizon4_kinematics.urdf")
         if not os.path.exists(urdf_file):
             raise FileNotFoundError(f"URDF file not found: {urdf_file}")
-        # Parse the URDF file and configure the chain
-        self.robot_chain = Chain.from_urdf_file(urdf_file)
-        active_links_mask = (
-            [False] + [True] * 7 + [False]
-        )  # Base + 7 DOF + End Effector
+        self.robot_chain = Chain.from_urdf_file(urdf_file) 
+        active_links_mask = ([False] + [True] * 7 + [False])  # Base + 7 DOF + End Effector (# 这个跟URDF有关系, base_link, link1, link2, link3, link4, link5, link6, link7, flange)
         self.robot_chain.active_links_mask = active_links_mask
-        # Filter active joints (revolute or prismatic)
         self.active_joints = [
             joint
             for joint in self.robot_chain.links
             if isinstance(joint, URDFLink)
             and (joint.joint_type == "revolute" or joint.joint_type == "prismatic")
         ]
-        # Validate the number of active joints
         if len(self.active_joints) != 7:  # Flexiv is a 7-DOF robot
             raise ValueError(
                 f"Expected 7 active joints, but found {len(self.active_joints)}. "
                 f"Check the URDF file and active_links_mask."
             )
+
         # Log successful initialization
         self.log.info("Flexiv robot kinematic chain successfully initialized.")
-
-        # Additional initializations can go here
-        self.log_file = "command_log.tum"
 
     # ----------------------------------------------------------------
     # Device Initialization and State Management
     # ----------------------------------------------------------------
 
     def initialize_robot(self):
+        # DONE
         """
         Initializes the robot by clearing faults and enabling it.
 
@@ -133,37 +128,15 @@ class Bestman_Real_Flexiv:
             self.log.error(f"Failed to initialize the robot: {str(e)}")
             return False
 
-    def clear_fault(self):
-        """
-        Clears any faults on the robot server and ensures the robot is operational.
-        """
-        if self.robot.isFault():
-            self.log.warn("Fault detected. Attempting to clear...")
-            self.robot.clearFault()
-            time.sleep(2)
-            if self.robot.isFault():
-                self.log.error("Fault could not be cleared.")
-                return
-            self.log.info("Fault cleared successfully.")
-
-        self.log.info("Enabling the robot...")
-        self.robot.enable()
-
-        for seconds_waited in range(10):
-            if self.robot.isOperational():
-                self.log.info("Robot is now operational.")
-                return
-            time.sleep(1)
-
-        self.log.warn("Robot is not operational after 10 seconds.")
-
     def update_robot_states(self):
+        # DONE
         """
         Updates the current robot states by fetching them from the robot.
         """
         self.robot.getRobotStates(self.robot_states)
 
     def go_home(self):
+        # DONE
         """
         Moves the robot arm to its initial (home) pose.
         """
@@ -171,29 +144,11 @@ class Bestman_Real_Flexiv:
         self.robot.executePrimitive("Home()")
 
     # ----------------------------------------------------------------
-    # Logging
-    # ----------------------------------------------------------------
-
-    def log_command(self, timestamp, target_pos):
-        """
-        Records a command with timestamp and target position.
-
-        Args:
-            timestamp (float): The time of the command.
-            target_pos (list): Target joint positions or end effector pose.
-        """
-        try:
-            with open(self.log_file, "a") as file:
-                file.write(f"{timestamp} {' '.join(map(str, target_pos))}\n")
-            self.log.info(f"Command logged: {timestamp}, {target_pos}")
-        except Exception as e:
-            self.log.error(f"Failed to log command: {str(e)}")
-
-    # ----------------------------------------------------------------
     # Arm Functions
     # ----------------------------------------------------------------
 
     def get_joint_bounds(self):
+        # DONE
         """
         Retrieves the joint limits of the robot arm.
 
@@ -205,6 +160,7 @@ class Bestman_Real_Flexiv:
         return list(zip(min_bounds, max_bounds))
 
     def print_arm_jointInfo(self):
+        # DONE
         """
         Prints the joint and link information of the robot's arm.
 
@@ -213,12 +169,13 @@ class Bestman_Real_Flexiv:
         """
         print("Arm joint and link information:")
         for i, link in enumerate(
-            self.robot_chain.links[1:]
-        ):  # Assuming arm starts at the second link
+            self.robot_chain.links[1:8]
+        ):
             print(f"Link {i + 1}: {link.name}")
             self.log.info(f"Link {i + 1}: {link.name}")
 
     def get_arm_id(self):
+        # DONE
         """
         Retrieves the serial ID of the robot arm.
 
@@ -234,6 +191,7 @@ class Bestman_Real_Flexiv:
             return None
 
     def get_DOF(self):
+        # DONE
         """
         Retrieves the degree of freedom (DOF) of the robot arm.
 
@@ -250,6 +208,7 @@ class Bestman_Real_Flexiv:
             return 0
 
     def get_arm_all_joint_idx(self):
+        # DONE
         """
         Retrieves the indices of all active joints in the robot arm.
 
@@ -261,6 +220,7 @@ class Bestman_Real_Flexiv:
         return joint_indices
 
     def get_tcp_link(self):
+        # DONE
         """
         Retrieves the name of the TCP (Tool Center Point) link.
 
@@ -276,6 +236,7 @@ class Bestman_Real_Flexiv:
             return None
 
     def get_current_joint_values(self):
+        # DONE
         """
         Retrieves the current joint angles of the robot arm.
 
@@ -292,6 +253,7 @@ class Bestman_Real_Flexiv:
             return []
 
     def get_current_eef_pose(self):
+        # DONE
         """
         Retrieves the current pose of the robot arm's end effector.
 
@@ -302,7 +264,7 @@ class Bestman_Real_Flexiv:
             self.update_robot_states()
             tcp_pose = self.robot_states.tcpPose  # [x, y, z, qw, qx, qy, qz]
             position = tcp_pose[:3]
-            orientation = tcp_pose[3:]  # [qw, qx, qy, qz] # !!!
+            orientation = tcp_pose[3:]  # [qw, qx, qy, qz] # !
             pose = Pose(position, orientation)
             self.log.info(f"Current end effector pose: {pose}")
             return pose
@@ -311,6 +273,7 @@ class Bestman_Real_Flexiv:
             return None
 
     def print_robot_info(self):
+        # DONE
         """
         Print Flexiv robot information to confirm available attributes.
         """
@@ -323,9 +286,8 @@ class Bestman_Real_Flexiv:
         except Exception as e:
             self.log.error(f"Failed to retrieve robot information: {str(e)}")
 
-    def move_arm_to_joint_values(
-        self, joint_values, target_vel=None, target_acc=None, MAX_VEL=None, MAX_ACC=None
-    ):
+    def move_arm_to_joint_values(self, joint_values, target_vel=None, target_acc=None, MAX_VEL=None, MAX_ACC=None):
+        # DONE
         """
         Moves the robot arm to the specified joint angles with optional velocity and acceleration.
 
@@ -340,20 +302,16 @@ class Bestman_Real_Flexiv:
             None
         """
         try:
-            # Set control mode
             self.robot.setMode(self.mode.NRT_JOINT_POSITION)
             self.update_robot_states()
             DOF = len(self.robot_states.q)
-
-            # Get limits from RobotInfo
-            alpha = 0.1  # Key coefficient to regulate the maximum speed, with a range of [0.0001, 1]
+            
+            # Key coefficient to regulate the maximum speed, with a range of [0.0001, 1]
+            alpha = 0.1
+            
             robot_info = self.robot.info()
             default_max_vel = [vel * alpha for vel in robot_info.dqMax]
-            default_max_acc = [
-                5.0
-            ] * DOF  # Assuming 5 rad/s² as default maximum acceleration
-
-            # Set default values
+            default_max_acc = [5.0] * DOF  # Assuming 5 rad/s² as default maximum acceleration
             MAX_VEL = MAX_VEL or default_max_vel
             MAX_ACC = MAX_ACC or default_max_acc
             target_vel = target_vel if target_vel is not None else [0.0] * DOF
@@ -380,6 +338,7 @@ class Bestman_Real_Flexiv:
     # ----------------------------------------------------------------
 
     def move_eef_to_goal_pose(self, goal_pose, max_linear_vel=0.1, max_angular_vel=0.5):
+        # DONE
         """
         Moves the end effector to the specified pose.
 
@@ -401,21 +360,13 @@ class Bestman_Real_Flexiv:
             pose = position + orientation
 
             self.robot.setMode(self.mode.NRT_CARTESIAN_MOTION_FORCE)
-            self.robot.sendCartesianMotionForce(
-                pose, wrench, max_linear_vel, max_angular_vel
-            )
+            self.robot.sendCartesianMotionForce(pose, wrench, max_linear_vel, max_angular_vel)
             self.log.info(f"Moved end effector to pose: {pose}")
         except Exception as e:
             self.log.error(f"Failed to move end effector to goal pose: {str(e)}")
 
-    def move_eef_to_goal_pose_wrench(
-        self,
-        goal_pose,
-        wrench,
-        max_linear_vel=0.1,
-        max_angular_vel=0.5,
-        contact_wrench=None,
-    ):
+    def move_eef_to_goal_pose_wrench(self, goal_pose, wrench, max_linear_vel=0.1, max_angular_vel=0.5, contact_wrench=None):
+        # TODO
         """
         Moves the end effector to a target pose with a specified wrench control.
 
@@ -451,6 +402,7 @@ class Bestman_Real_Flexiv:
             self.log.error(f"Failed to move EEF to goal pose with wrench: {str(e)}")
 
     def rotate_eef_tcp(self, axis, angle):
+        # TODO
         """
         Rotates the end effector TCP around a specified axis by a given angle.
 
@@ -461,7 +413,6 @@ class Bestman_Real_Flexiv:
         Returns:
             None
         """
-        # TODO
         try:
             current_pose = self.get_current_eef_pose()
             position = current_pose.get_position()
@@ -486,6 +437,7 @@ class Bestman_Real_Flexiv:
             self.log.error(f"Failed to rotate EEF TCP: {str(e)}")
 
     def rotate_eef_joint(self, angle):
+        # TODO
         """
         Rotates the end effector of the robot arm using the last joint.
 
@@ -495,7 +447,6 @@ class Bestman_Real_Flexiv:
         Returns:
             None
         """
-        # TODO
         try:
             current_joint_values = self.get_current_joint_values()
             target_joint_values = current_joint_values.copy()
@@ -525,6 +476,7 @@ class Bestman_Real_Flexiv:
     # ----------------------------------------------------------------
 
     def joints_to_cartesian(self, joint_values):
+        # DONE
         """
         Converts the robot's joint angles to its Cartesian coordinates. #法兰盘
 
@@ -533,9 +485,6 @@ class Bestman_Real_Flexiv:
 
         Returns:
             Pose: A Pose object representing the Cartesian position and quaternion orientation.
-
-        Raises:
-            ValueError: If the number of joint values does not match the number of active joints.
         """
         try:
             if len(joint_values) != len(self.active_joints):
@@ -562,13 +511,18 @@ class Bestman_Real_Flexiv:
                 quaternion[2],
             ]  # qw, qx, qy, qz # !!!
 
+            # 添加 gripper 长度补偿（沿着 Z 轴正方向）
+            gripper_length = 0.15  # 这里的 0.15 是 gripper 的长度，需要与 cartesian_to_joints 保持一致
+            position = position + gripper_length * orientation_matrix[:, 2]  # Z 轴方向的偏移
+
             self.log.info(f"Converted joint values {joint_values} to Cartesian Pose.")
             return Pose(position, quaternion)
         except Exception as e:
             self.log.error(f"Error converting joint values to Cartesian: {str(e)}")
             raise
 
-    def cartesian_to_joints(self, pose):
+    def cartesian_to_joints(self, pose, initial_joint_values=None):
+        # DONE
         """
         Args:
             position (list[float]): Cartesian position of the robot arm.
@@ -576,9 +530,6 @@ class Bestman_Real_Flexiv:
 
         Returns:
             list[float]: Joint angles corresponding to the given Cartesian coordinates.
-
-        Raises:
-            ValueError: If the solution is invalid or out of bounds.
         """
         try:
             print(f"pose.orientation:{pose.orientation}")
@@ -594,11 +545,13 @@ class Bestman_Real_Flexiv:
 
             target_pose = np.eye(4)
             target_pose[:3, :3] = rotation_matrix
-            target_pose[:3, 3] = (
-                pose.position - 0.15 * rotation_matrix[:, 2]
-            )  # 去掉gripper的长度
+            # 添加 gripper 长度补偿（沿着 Z 轴正方向）
+            gripper_length = 0.15  # 这里的 0.15 是 gripper 的长度，需要与 joints_to_cartesian 保持一致
+            target_pose[:3, 3] = (pose.position - gripper_length * rotation_matrix[:, 2])  # 去掉gripper的长度
+            
+            if initial_joint_values is None:
+                initial_joint_values = [0] + self.get_current_joint_values() + [0]
 
-            initial_joint_values = [0] + self.get_current_joint_values() + [0]
             joint_values = ikpy.inverse_kinematics.inverse_kinematic_optimization(
                 chain=self.robot_chain,
                 target_frame=target_pose,
@@ -608,16 +561,14 @@ class Bestman_Real_Flexiv:
 
             if not self._validate_joint_limits(joint_values):
                 raise ValueError("Joint values exceed physical joint limits.")
-
-            self.log.info(
-                f"Converted Cartesian position {pose.position} to joint values."
-            )
+            self.log.info(f"Converted Cartesian position {pose.position} to joint values.")
             return joint_values[1:8]
         except Exception as e:
             self.log.error(f"Error converting Cartesian to joint values: {str(e)}")
             raise
 
     def _validate_joint_limits(self, joint_values):
+        # DONE
         """
         Validates if the joint values are within the robot's physical joint limits.
 
@@ -634,6 +585,7 @@ class Bestman_Real_Flexiv:
         return True
 
     def calculate_IK_error(self, goal_position, goal_orientation):
+        # TODO
         """
         Calculates the inverse kinematics (IK) error for reaching a target pose.
 
@@ -657,9 +609,7 @@ class Bestman_Real_Flexiv:
             )
 
             total_error = position_error + orientation_error
-            self.log.info(
-                f"Calculated IK error. Position error: {position_error}, Orientation error: {orientation_error}."
-            )
+            self.log.info(f"Calculated IK error. Position error: {position_error}, Orientation error: {orientation_error}.")
             return total_error
         except Exception as e:
             self.log.error(f"Failed to calculate IK error: {str(e)}")
@@ -770,51 +720,8 @@ class Bestman_Real_Flexiv:
     # ----------------------------------------------------------------
     # Other Functions
     # ----------------------------------------------------------------
-    # def wait_for_motion_completion(self, target_joint_values, error_threshold=0.01, speed_threshold=0.01, timeout=10):
-    #     """
-    #     Waits until the robot's motion is completed by checking the error between current and target joint values
-    #     and monitoring joint speeds.
-
-    #     Args:
-    #         target_joint_values (list[float]): The target joint values (in radians).
-    #         error_threshold (float): The allowable error threshold for each joint (in radians). Default is 0.01 rad.
-    #         speed_threshold (float): The allowable speed threshold for each joint (in rad/s). Default is 0.01 rad/s.
-    #         timeout (int): The maximum time to wait for completion (in seconds). Default is 10 seconds.
-
-    #     Returns:
-    #         bool: True if motion is completed within timeout, False otherwise.
-    #     """
-    #     motion_complete = {"status": False}
-    #     start_time = rospy.get_time()
-
-    #     def check_motion(event):
-    #         self.update_robot_states()
-    #         current_joint_values = self.robot_states.q
-    #         current_joint_speeds = self.robot_states.dq
-    #         # Calculate the absolute difference between current and target joint values
-    #         errors = [abs(c - t) for c, t in zip(current_joint_values, target_joint_values)]
-    #         # Check if motion is completed
-    #         if all(error <= error_threshold for error in errors) and all(abs(speed) <= speed_threshold for speed in current_joint_speeds):
-    #             motion_complete["status"] = True
-    #             rospy.loginfo("Motion completed: Joint values and speeds are within thresholds.")
-    #             rospy.signal_shutdown("Motion completed")
-    #         if rospy.get_time() - start_time > timeout:
-    #             rospy.logerr("Timeout: Motion did not complete within the specified time.")
-    #             rospy.signal_shutdown("Timeout")
-
-    #     # Start ROS Timer for checking motion status
-    #     rospy.Timer(rospy.Duration(0.01), check_motion)  # Check every 10ms
-    #     rospy.spin()
-
-    #     return motion_complete["status"]
-
-    def wait_for_joints(
-        self,
-        target_joint_values,
-        error_threshold=0.01,
-        speed_threshold=0.01,
-        timeout=5,
-    ):
+    def wait_for_joints(self, target_joint_values, error_threshold=0.01, speed_threshold=0.01, timeout=0.2):
+        # DONE
         """
         Waits until the robot's motion is completed by checking the error between current and target joint values
         and monitoring joint speeds.
@@ -848,12 +755,8 @@ class Bestman_Real_Flexiv:
         rospy.logerr("Timeout reached.")
         return False  # Timeout occurred
 
-    def wait_for_eef(
-        self,
-        target_tcp_pose,
-        position_error_threshold=0.03,
-        timeout=5,
-    ):
+    def wait_for_eef(self, target_tcp_pose, position_error_threshold=0.03, timeout=0.2):
+        # DONE
         """
         Waits until the robot's motion is completed by checking the error between current and target tcp pose
         and monitoring tcp velocities.
@@ -863,7 +766,7 @@ class Bestman_Real_Flexiv:
             position_error_threshold (float): The allowable position error threshold (in meters). Default is 0.01 m.
             orientation_error_threshold (float): The allowable orientation error threshold (in radians). Default is 0.01 rad.
             velocity_threshold (float): The allowable velocity threshold for the tcp (in m/s for linear and rad/s for angular). Default is 0.01 rad/s.
-            timeout (int): The maximum time to wait for completion (in seconds). Default is 10 seconds.
+            timeout (int): The maximum time to wait for completion (in seconds). Default is 0.2 seconds.
 
         Returns:
             bool: True if motion is completed within timeout, False otherwise.
@@ -877,29 +780,25 @@ class Bestman_Real_Flexiv:
         start_time = rospy.get_time()
         while rospy.get_time() - start_time < timeout:
             self.update_robot_states()
-            current_tcp_pose = self.robot_states.tcpPose  # Get the current TCP pose
-            # current_tcp_velocity = (
-            #     self.robot_states.tcpVel
-            # )  # Get the current TCP velocity
-
+            current_tcp_pose = self.robot_states.tcpPose
+            
             # Compute position error (Euclidean distance between position vectors)
             position_error = np.linalg.norm(
                 np.array(current_tcp_pose[:3]) - np.array(target_tcp_pose[:3])
             )
 
             # Check if position errors are within threshold and velocities are below threshold
-            if (
-                position_error <= position_error_threshold
-            ):  # and np.linalg.norm(current_tcp_velocity[:3]) <= velocity_threshold
+            if position_error <= position_error_threshold:
                 rospy.loginfo("Motion completed successfully.")
-                return True  # Exit on success
-
+                return True
+            
             rospy.sleep(0.01)  # Check every 10ms
 
         rospy.logerr("Timeout reached.")
         return False  # Timeout occurred
 
     def compute_orientation_error(self, current_orientation, target_orientation):
+        # TODO
         """
         Compute the orientation error between two quaternions.
         """
