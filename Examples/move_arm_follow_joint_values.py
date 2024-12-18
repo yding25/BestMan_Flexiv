@@ -5,7 +5,7 @@
 # @Time           : 2024-12-01 20:13:39
 # @Author         : Yan
 # @Email          : yding25@binghamton.edu
-# @Description    : XXX
+# @Description    : follow a series of joint values
 # @Usage          : python move_arm_follow_joint_values.py 192.168.2.100 192.168.2.108 20
 """
 
@@ -13,7 +13,6 @@ import argparse
 import rospy
 from Robotics_API import Bestman_Real_Flexiv
 import flexivrdk
-import time
 
 def main():
     # Parse Arguments

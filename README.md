@@ -13,6 +13,9 @@ Welcome to the BestMan_Flexiv repository, a codebase dedicated to the Flexiv rob
 
 ## 🏠 Getting Started
 
+## 🔥 News
+- [2024-12-18] We update API names, such as "joint angles" -> "joint values", and revise some function "joints_to_cartesian", "cartesian_to_joints".
+
 ### Prerequisites
 
 > ***Note**: We recommand Ubuntu 22.04 and python version deault to 3.8.*
