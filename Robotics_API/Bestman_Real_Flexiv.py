@@ -302,7 +302,7 @@ class Bestman_Real_Flexiv:
             self.update_robot_states()
             tcp_pose = self.robot_states.tcpPose  # [x, y, z, qw, qx, qy, qz]
             position = tcp_pose[:3]
-            orientation = tcp_pose[3:]  # [qw, qx, qy, qz]
+            orientation = tcp_pose[3:]  # [qw, qx, qy, qz] # !!!
             pose = Pose(position, orientation)
             self.log.info(f"Current end effector pose: {pose}")
             return pose
@@ -554,7 +554,13 @@ class Bestman_Real_Flexiv:
             cartesian_matrix = self.robot_chain.forward_kinematics(full_joint_values)
             position = cartesian_matrix[:3, 3]
             orientation_matrix = cartesian_matrix[:3, :3]
-            quaternion = R.from_matrix(orientation_matrix).as_quat()
+            quaternion = R.from_matrix(orientation_matrix).as_quat()  # qx, qy, qz, qw
+            quaternion = [
+                quaternion[3],
+                quaternion[0],
+                quaternion[1],
+                quaternion[2],
+            ]  # qw, qx, qy, qz # !!!
 
             self.log.info(f"Converted joint values {joint_values} to Cartesian Pose.")
             return Pose(position, quaternion)
@@ -562,9 +568,8 @@ class Bestman_Real_Flexiv:
             self.log.error(f"Error converting joint values to Cartesian: {str(e)}")
             raise
 
-    def cartesian_to_joints(self, position, orientation):
+    def cartesian_to_joints(self, pose):
         """
-        Converts the robot's Cartesian coordinates to its joint angles.
 
         Args:
             position (list[float]): Cartesian position of the robot arm.
@@ -577,13 +582,24 @@ class Bestman_Real_Flexiv:
             ValueError: If the solution is invalid or out of bounds.
         """
         try:
-            rotation_matrix = R.from_quat(orientation).as_matrix()
+            print(f"pose.orientation:{pose.orientation}")
+            orientation = pose.orientation  # qw, qx, qy, qz
+            orientation = [
+                orientation[1],
+                orientation[2],
+                orientation[3],
+                orientation[0],
+            ]  # [qx, qy, qz, qw] # !!!
+            rotation = R.from_quat(orientation)
+            rotation_matrix = rotation.as_matrix()
 
             target_pose = np.eye(4)
             target_pose[:3, :3] = rotation_matrix
-            target_pose[:3, 3] = position
+            target_pose[:3, 3] = (
+                pose.position - 0.15 * rotation_matrix[:, 2]
+            )  # 去掉gripper的长度
 
-            initial_joint_values = [0] * len(self.robot_chain)
+            initial_joint_values = [0] + self.get_current_joint_values() + [0]
             joint_values = ikpy.inverse_kinematics.inverse_kinematic_optimization(
                 chain=self.robot_chain,
                 target_frame=target_pose,
@@ -594,7 +610,9 @@ class Bestman_Real_Flexiv:
             if not self._validate_joint_limits(joint_values):
                 raise ValueError("Joint values exceed physical joint limits.")
 
-            self.log.info(f"Converted Cartesian position {position} to joint values.")
+            self.log.info(
+                f"Converted Cartesian position {pose.position} to joint values."
+            )
             return joint_values[1:8]
         except Exception as e:
             self.log.error(f"Error converting Cartesian to joint values: {str(e)}")
