@@ -526,7 +526,7 @@ class Bestman_Real_Flexiv:
 
     def joints_to_cartesian(self, joint_values):
         """
-        Converts the robot's joint angles to its Cartesian coordinates.
+        Converts the robot's joint angles to its Cartesian coordinates. #法兰盘
 
         Args:
             joint_values (list[float]): A list of joint angles for the robot arm.
@@ -570,7 +570,6 @@ class Bestman_Real_Flexiv:
 
     def cartesian_to_joints(self, pose):
         """
-
         Args:
             position (list[float]): Cartesian position of the robot arm.
             orientation (list[float]): Quaternion orientation of the robot arm.
