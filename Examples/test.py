@@ -1,19 +1,19 @@
 # !/usr/bin/env python
 # -*- encoding: utf-8 -*-
 """
-# @FileName       : move_eef_to_pose.py
-# @Time           : 2024-12-01 22:29:10
+# @FileName       : open_gripper.py
+# @Time           : 2024-11-30 20:52:08
 # @Author         : Yan
 # @Email          : yding25@binghamton.edu
-# @Description    : XXX
-# @Usage          : python move_eef_to_pose.py 192.168.2.100 192.168.2.108 20
+# @Description    : Open robotiq gripper
+# @Usage          : python test.py 192.168.2.100 192.168.2.108 20
 """
 
 import argparse
-import rospy
-from Robotics_API import Bestman_Real_Flexiv, Pose
-import flexivrdk
 import time
+from Robotics_API import Bestman_Real_Flexiv
+import flexivrdk
+
 
 def main():
     # Parse Arguments
@@ -36,25 +36,27 @@ def main():
     log = flexivrdk.Log()
 
     try:
-        # Initialize ROS node
-        rospy.init_node("robot_states_display", anonymous=True)
-
         # Instantiate robot interface
         bestman = Bestman_Real_Flexiv(args.robot_ip, args.local_ip, args.frequency)
-        
+
         # Initialize robot
         if not bestman.initialize_robot():
             return  # Exit if initialization fails
-        
-        # Define the target trajectory
-        target_pose = Pose([0.6121770143508911, 0.04117409512400627, 0.2725994288921356], [0.4189033806324005, -0.5498623847961426, 0.6234208345413208, -0.36540088057518005]) # 四元数
-        # target_pose = Pose([0.6121770143508911, 0.04117409512400627, 0.2725994288921356], [-1.478, -0.092, -2.009]) # 欧拉角（弧度）
-        
-        # Move the arm to follow the target trajectory
-        bestman.move_eef_to_goal_pose(target_pose)
-        
-        # Wait for motion completion (This method will block the main threa)
-        bestman.wait_for_eef(target_pose)
+
+        # Open gripper
+        current_pose = bestman.get_current_eef_pose()
+        current_joint = bestman.get_current_joint_values()
+        print(f'gt current_pose:{current_pose.position} and {current_pose.orientation}, current_joint:{current_joint}')
+
+        # bestman.move_arm_to_joint_values(current_joint)
+
+        # predicted_joint = bestman.cartesian_to_joints(current_pose)
+        # bestman.move_arm_to_joint_values(predicted_joint)
+        # print(f'predicted joint :{predicted_joint}')
+
+        predicted_pose = bestman.joints_to_cartesian(current_joint)
+        bestman.move_eef_to_goal_pose(predicted_pose)
+        print(f'predicted pose :{predicted_pose}')
 
     except Exception as e:
         # Log any exceptions that occur

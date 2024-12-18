@@ -53,7 +53,14 @@ def main():
             return  # Exit if initialization fails
         
         # Move the arm to a set of joint values
-        target_joint = [0.8, -0.7, 0, 1.3, 0, 0.5, 0.2]
+
+        # target_joint = [0.8, -0.7, 0, 1.3, 0, 0.5, 0.2]
+
+        import math
+        target_joint = [0, -40, 0, 90, 0, 80, 0]
+        # target_joint = [0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01]
+        target_joint = [math.radians(target_joint[n]) for n in range(7)]
+
         bestman.move_arm_to_joint_values(target_joint)
         
         # Wait for motion completion (This method will block the main threa)
