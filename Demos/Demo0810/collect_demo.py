@@ -14,7 +14,7 @@ import os
 import xml.etree.ElementTree as ET
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(os.path.join(parent_dir, 'RoboticsToolBox'))
-from Robotics_API.Utils import quat2eulerZYX, list2str, parse_pt_states
+from TODO.Utils import quat2eulerZYX, list2str, parse_pt_states
 from Bestman_flexiv import *
 
 # Maximum contact wrench [fx, fy, fz, mx, my, mz] [N][Nm]

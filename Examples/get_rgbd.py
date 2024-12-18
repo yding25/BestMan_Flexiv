@@ -5,7 +5,7 @@
 # @Time           : 2024-12-02 01:32:39
 # @Author         : Yan
 # @Email          : yding25@binghamton.edu
-# @Description    : Get rgbd
+# @Description    : Get rgbd camera
 # @Usage          : python get_rgbd.py 192.168.2.100 192.168.2.108 20
 """
 
@@ -44,7 +44,7 @@ def main():
         bestman.move_eef_to_goal_pose(target_pose)
         
         # Wait for motion completion (This method will block the main threa)
-        bestman.wait_for_motion_completion_eef(target_pose)
+        bestman.wait_for_eef(target_pose)
         
         # Marker detection and transformation
         print('start checking RGBD')

@@ -307,7 +307,7 @@ class Bestman_Real_Flexiv:
             DOF = len(self.robot_states.q)
             
             # Key coefficient to regulate the maximum speed, with a range of [0.0001, 1]
-            alpha = 0.1
+            alpha = 0.2
             
             robot_info = self.robot.info()
             default_max_vel = [vel * alpha for vel in robot_info.dqMax]
@@ -720,7 +720,7 @@ class Bestman_Real_Flexiv:
     # ----------------------------------------------------------------
     # Other Functions
     # ----------------------------------------------------------------
-    def wait_for_joints(self, target_joint_values, error_threshold=0.01, speed_threshold=0.01, timeout=0.2):
+    def wait_for_joints(self, target_joint_values, error_threshold=0.01, speed_threshold=0.01, timeout=0.3):
         # DONE
         """
         Waits until the robot's motion is completed by checking the error between current and target joint values
