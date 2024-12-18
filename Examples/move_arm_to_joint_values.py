@@ -57,7 +57,7 @@ def main():
         # target_joint = [0.8, -0.7, 0, 1.3, 0, 0.5, 0.2]
 
         import math
-        target_joint = [0, -40, 0, 90, 0, 80, 0]
+        target_joint = [0, -20, 0, 110, 0, 40, 0]
         # target_joint = [0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01]
         target_joint = [math.radians(target_joint[n]) for n in range(7)]
 

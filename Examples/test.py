@@ -50,13 +50,13 @@ def main():
 
         # bestman.move_arm_to_joint_values(current_joint)
 
-        # predicted_joint = bestman.cartesian_to_joints(current_pose)
-        # bestman.move_arm_to_joint_values(predicted_joint)
-        # print(f'predicted joint :{predicted_joint}')
+        predicted_joint = bestman.cartesian_to_joints(current_pose)
+        bestman.move_arm_to_joint_values(predicted_joint)
+        print(f'predicted joint :{predicted_joint}')
 
-        predicted_pose = bestman.joints_to_cartesian(current_joint)
-        bestman.move_eef_to_goal_pose(predicted_pose)
-        print(f'predicted pose :{predicted_pose}')
+        # predicted_pose = bestman.joints_to_cartesian(current_joint)
+        # bestman.move_eef_to_goal_pose(predicted_pose)
+        # print(f'predicted pose :{predicted_pose}')
 
     except Exception as e:
         # Log any exceptions that occur
