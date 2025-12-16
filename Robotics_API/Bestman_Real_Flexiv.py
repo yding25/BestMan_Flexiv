@@ -190,7 +190,7 @@ class Bestman_Real_Flexiv:
             self.log.error(f"Failed to get robot arm ID: {str(e)}")
             return None
 
-    def get_DOF(self):
+    def get_dof(self):
         # DONE
         """
         Retrieves the degree of freedom (DOF) of the robot arm.
@@ -207,7 +207,7 @@ class Bestman_Real_Flexiv:
             self.log.error(f"Failed to retrieve DOF: {str(e)}")
             return 0
 
-    def get_arm_all_joint_idx(self):
+    def get_joint_idx(self):
         # DONE
         """
         Retrieves the indices of all active joints in the robot arm.
@@ -219,7 +219,7 @@ class Bestman_Real_Flexiv:
         self.log.info(f"Retrieved joint indices: {joint_indices}")
         return joint_indices
 
-    def get_tcp_link(self):
+    def get_links_info(self):
         # DONE
         """
         Retrieves the name of the TCP (Tool Center Point) link.
